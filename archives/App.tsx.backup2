@@ -1,0 +1,271 @@
+import React, { useEffect, useState } from "react";
+import { ListItem, Button, Overlay, Tab, TabView } from "@rneui/themed";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import DateTimePicker from "@react-native-community/datetimepicker";
+
+interface Row {
+  id: number;
+  name: string;
+  date: Date | string;
+}
+
+const App: React.FC = () => {
+  const [rows, setRows] = useState<Row[]>([
+    { id: 1, name: "الملك", date: new Date("2023-06-15") },
+    { id: 2, name: "القلم", date: new Date("2023-06-01") },
+    { id: 3, name: "الحاقة", date: new Date("2023-06-15") },
+    { id: 4, name: "المعارج", date: new Date("2023-06-01") },
+    { id: 5, name: "نوح", date: new Date("2023-06-10") },
+    { id: 6, name: "الجن", date: new Date("2023-06-15") },
+    { id: 7, name: "المزمل", date: new Date("2023-06-01") },
+    { id: 8, name: "المدثر", date: new Date("2023-06-10") },
+    { id: 9, name: "القيامة", date: new Date("2023-06-15") },
+    { id: 10, name: "الإنسان", date: new Date("2023-06-15") },
+    { id: 11, name: "المرسلات", date: "Not reviewed" },
+  ]);
+
+  const [index, setIndex] = React.useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const storedRows = await AsyncStorage.getItem("rows");
+        if (storedRows !== null) {
+          setRows(JSON.parse(storedRows));
+        }
+      } catch (error) {
+        console.log("Error retrieving data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate] = useState<Date>(new Date());
+  const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
+
+  const handleDateClick = (id: number) => {
+    setSelectedRowId(id);
+    setShowDatePicker(true);
+  };
+
+  const handleCheckboxToggle = async (id: number) => {
+    const currentDate = new Date();
+    const updatedRows = rows.map((row) =>
+      row.id === id ? { ...row, date: currentDate } : row
+    );
+    setRows(updatedRows);
+    try {
+      await AsyncStorage.setItem("rows", JSON.stringify(updatedRows));
+    } catch (error) {
+      console.log("Error saving data:", error);
+    }
+  };
+
+  const handleDateSelect = (event: any, date?: Date) => {
+    setShowDatePicker(false);
+    if (date) {
+      if (selectedRowId !== null) {
+        const updatedRows = rows.map((row) =>
+          row.id === selectedRowId ? { ...row, date } : row
+        );
+        setRows(updatedRows);
+        AsyncStorage.setItem("rows", JSON.stringify(updatedRows)).catch(
+          (error) => {
+            console.log("Error saving data:", error);
+          }
+        );
+      }
+    }
+  };
+
+  const getFormattedDate = (date: Date | string): string => {
+    if (date === "Not reviewed") {
+      return "Not reviewed";
+    }
+    const d = new Date(date);
+    const options = { month: "short", day: "2-digit", year: "numeric" };
+    return d.toLocaleDateString("en-US", options);
+  };
+
+  const getRowColor = (date: Date | string): string => {
+    if (date === "Not reviewed") {
+      return "lightgrey";
+    }
+
+    const d = new Date(date);
+    const fourteenDaysAgo = new Date();
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+    if (d < fourteenDaysAgo) {
+      return "rgba(254, 121, 104, 0.9)";
+    } else {
+      return "rgba(135, 211, 124,.9)";
+    }
+  };
+
+  const handleClearData = async () => {
+    try {
+      await AsyncStorage.removeItem("rows");
+      setRows([]);
+    } catch (error) {
+      console.log("Error clearing data:", error);
+    }
+  };
+  const toggleOverlay = () => {
+    setShowDatePicker(!showDatePicker);
+  };
+
+  return (
+    <SafeAreaProvider>
+      <SafeAreaView style={{ flex: 1 }}>
+        <Tab
+          value={index}
+          onChange={(e) => setIndex(e)}
+          indicatorStyle={{
+            backgroundColor: "primary",
+            height: 3,
+          }}
+          variant="primary"
+        >
+          <Tab.Item
+            title="About"
+            titleStyle={{ fontSize: 12 }}
+            icon={{
+              name: "info",
+              color: "white",
+            }}
+          />
+          <Tab.Item
+            title="Edit"
+            titleStyle={{ fontSize: 12 }}
+            icon={{ name: "edit", color: "white" }}
+          />
+          <Tab.Item
+            title="Tracker"
+            titleStyle={{ fontSize: 12 }}
+            icon={{ name: "traffic", color: "white" }}
+          />
+        </Tab>
+
+        <TabView value={index} onChange={setIndex} animationType="spring">
+          <TabView.Item style={{ flex: 1, padding: 10 }}>
+            <Text>Welcome to the Quran Memorization Tracker application.</Text>
+          </TabView.Item>
+          <TabView.Item style={{ flex: 1 }}>
+            <View>
+              <Button
+                color={"red"}
+                onPress={handleClearData}
+                buttonStyle={{
+                  borderRadius: 9,
+                  marginTop: 8,
+                  marginHorizontal: 80,
+                }}
+              >
+                Clear Data
+              </Button>
+            </View>
+          </TabView.Item>
+          <TabView.Item style={{ flex: 1 }}>
+            <View>
+              <ScrollView style={{ paddingTop: 8 }}>
+                {rows.map((row) => (
+                  <TouchableOpacity
+                    onPress={() => handleCheckboxToggle(row.id)}
+                    key={row.id}
+                    style={styles.button}
+                    activeOpacity={0.4}
+                  >
+                    <ListItem.Content
+                      style={{
+                        backgroundColor: getRowColor(row.date),
+                        borderRadius: 9,
+                        padding: 8,
+                      }}
+                    >
+                      <View style={styles.titleContainer}>
+                        <Button
+                          type="clear"
+                          size="sm"
+                          onPress={() => handleDateClick(row.id)}
+                        >
+                          {getFormattedDate(row.date)}
+                        </Button>
+                        <ListItem.Title style={styles.title}>
+                          <Text>{row.name}</Text>
+                        </ListItem.Title>
+                      </View>
+                    </ListItem.Content>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+              <Overlay
+                isVisible={showDatePicker}
+                onBackdropPress={toggleOverlay}
+              >
+                <View style={styles.modalContainer}>
+                  <DateTimePicker
+                    value={selectedDate}
+                    mode="date"
+                    display="inline"
+                    onChange={handleDateSelect}
+                    maximumDate={new Date()}
+                  />
+                </View>
+              </Overlay>
+            </View>
+          </TabView.Item>
+        </TabView>
+      </SafeAreaView>
+    </SafeAreaProvider>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "white",
+  },
+  button: {
+    paddingVertical: 5,
+    paddingHorizontal: 20,
+    borderRadius: 9,
+  },
+  title: {
+    flex: 1,
+    textAlign: "right",
+  },
+  modalContainer: {
+    backgroundColor: "white",
+    padding: 20,
+    margin: 20,
+    borderRadius: 8,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  clearDataButtonContainer: {
+    marginTop: 20,
+  },
+  titleContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    height: "100%",
+  },
+});
+export default App;

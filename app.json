@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "quran-tracker",
+    "name": "Muraja3a",
     "slug": "quran-tracker",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,11 +11,15 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "splash": {
+        "image": "./assets/splash.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#ffffff"
+      },
+      "bundleIdentifier": "com.rafikee.qurantracker"
     },
     "android": {
       "adaptiveIcon": {
@@ -25,6 +29,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "85c4e158-b73a-47ea-9b06-c77d2f907641"
+      }
     }
   }
 }
