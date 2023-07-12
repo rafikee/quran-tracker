@@ -3,8 +3,7 @@ import React, { useEffect, useState } from "react";
 import { ScrollView, TouchableOpacity, StyleSheet, View } from "react-native";
 import { ListItem, Overlay, Button, Text } from "@rneui/themed";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { getData, setData, Chapter } from "./storageutil";
-import { getChapterColor, getFormattedDate } from "./ChapterFormat";
+import { getData, setData, Chapter, getDays, days } from "./storageutil";
 
 interface TrackerProps {
   refreshData: boolean;
@@ -12,11 +11,14 @@ interface TrackerProps {
 
 const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
   const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [colors, setColors] = useState<days>({ orange: 7, red: 14 });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const result = await getData();
+        const result_days = await getDays();
+        setColors(result_days);
         setChapters(result);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -67,11 +69,47 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
           style={{ alignItems: "center", justifyContent: "center", flex: 1 }}
         >
           <Text style={{ fontSize: 16 }}>
-            Please go to the Edit tab and add Surahs to review.
+            Start in the About tab to learn how this works.
           </Text>
         </View>
       );
     }
+    const getChapterColor = (date: Date | string): string => {
+      if (date === "Not reviewed") {
+        return "#eaddcf";
+      }
+      const d = new Date(date);
+
+      const longTimeAgo = new Date();
+      const shortTimeAgo = new Date();
+      longTimeAgo.setDate(longTimeAgo.getDate() - colors.red);
+      shortTimeAgo.setDate(shortTimeAgo.getDate() - colors.orange);
+      if (d < longTimeAgo) {
+        return "#d5b5c4";
+      } else if (d < shortTimeAgo) {
+        return "#FFD3A3";
+      } else {
+        return "#c9d5b5";
+      }
+    };
+
+    const getFormattedDate = (date: Date | string): string => {
+      if (!date) {
+        return "Not reviewed";
+      }
+
+      if (date === "Not reviewed") {
+        return "Not reviewed";
+      }
+      const d = new Date(date);
+      const options = {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+      } as const;
+      return d.toLocaleDateString("en-US", options);
+    };
+
     const reviewedChapters = chapters.filter((chapter) => chapter.review);
     return reviewedChapters.map((chapter) => (
       <TouchableOpacity

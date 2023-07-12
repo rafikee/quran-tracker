@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import allChapters from "../assets/chapters.json";
 
 const STORAGE_KEY = "chapters";
+const STORAGE_DAYS_KEY = "days";
 
 export interface Chapter {
   id: number;
@@ -11,6 +12,11 @@ export interface Chapter {
   transliteration: string | null;
   total_verses: number | null;
   type: string | null;
+}
+
+export interface days {
+  orange: number;
+  red: number;
 }
 
 export const getData = async (): Promise<Chapter[]> => {
@@ -58,4 +64,28 @@ export const resetData = async (): Promise<Chapter[]> => {
     console.log("Error resetting data:", error);
   }
   return [];
+};
+
+export const updateDays = async (data: days): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(STORAGE_DAYS_KEY, JSON.stringify(data));
+  } catch (error) {
+    data = { orange: 7, red: 14 };
+    await AsyncStorage.setItem(STORAGE_DAYS_KEY, JSON.stringify(data));
+    console.log("Error saving data:", error);
+  }
+};
+
+export const getDays = async (): Promise<days> => {
+  try {
+    const storedData = await AsyncStorage.getItem(STORAGE_DAYS_KEY);
+    if (storedData !== null) {
+      return JSON.parse(storedData);
+    } else {
+      return { orange: 7, red: 14 };
+    }
+  } catch (error) {
+    console.log("Error retrieving data:", error);
+    return { orange: 7, red: 14 };
+  }
 };
