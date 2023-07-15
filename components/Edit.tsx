@@ -1,7 +1,7 @@
 import { View, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
-import { ListItem, Text } from "@rneui/themed";
+import { ListItem, Text, SocialIcon } from "@rneui/themed";
 import React, { useEffect, useState } from "react";
-import { getData, setData, Chapter } from "./storageutil";
+import { getData, setData, Chapter, getLang } from "./storageutil";
 
 interface TrackerProps {
   refreshData: boolean;
@@ -9,18 +9,33 @@ interface TrackerProps {
 
 const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
   const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [arabicTrue, setArabicTrue] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const result = await getData();
         setChapters(result);
+        const lang = await getLang();
+        setArabicTrue(lang);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching data :(...", error);
       }
     };
     fetchData();
   }, [refreshData]);
+
+  if (isLoading) {
+    // Display loading indicator while data is being fetched
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <SocialIcon loading iconSize={100} />
+      </View>
+    );
+  }
 
   const handleChapterClick = async (id: number) => {
     const updatedChapters = chapters.map((chapter) =>
@@ -61,7 +76,7 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
           <View style={styles.titleContainer}>
             <Text>{chapter.review ? "In Tracker" : "Not Memorized"}</Text>
             <ListItem.Title style={styles.title}>
-              <Text>{chapter.name}</Text>
+              <Text>{arabicTrue ? chapter.name : chapter.transliteration}</Text>
             </ListItem.Title>
           </View>
         </ListItem.Content>

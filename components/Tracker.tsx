@@ -1,9 +1,16 @@
 // Tracker.tsx
 import React, { useEffect, useState } from "react";
 import { ScrollView, TouchableOpacity, StyleSheet, View } from "react-native";
-import { ListItem, Overlay, Button, Text } from "@rneui/themed";
+import { ListItem, Overlay, Button, Text, SocialIcon } from "@rneui/themed";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { getData, setData, Chapter, getDays, days } from "./storageutil";
+import {
+  getData,
+  setData,
+  Chapter,
+  getDays,
+  days,
+  getLang,
+} from "./storageutil";
 
 interface TrackerProps {
   refreshData: boolean;
@@ -12,14 +19,26 @@ interface TrackerProps {
 const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [colors, setColors] = useState<days>({ orange: 7, red: 14 });
+  const [arabicTrue, setArabicTrue] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedChapterId, setSelectedChapterId] = useState<number | null>(
+    null
+  );
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const result = await getData();
+        setChapters(result);
         const result_days = await getDays();
         setColors(result_days);
-        setChapters(result);
+        const lang = await getLang();
+        setColors(result_days);
+        setArabicTrue(lang);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -27,11 +46,14 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
     fetchData();
   }, [refreshData]);
 
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [selectedChapterId, setSelectedChapterId] = useState<number | null>(
-    null
-  );
+  if (isLoading) {
+    // Display loading indicator while data is being fetched
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <SocialIcon loading iconSize={100} />
+      </View>
+    );
+  }
 
   const handleChapterClick = async (id: number) => {
     const currentDate = new Date();
@@ -69,7 +91,7 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
           style={{ alignItems: "center", justifyContent: "center", flex: 1 }}
         >
           <Text style={{ fontSize: 16 }}>
-            Start in the About tab to learn how this works.
+            Start in the Info tab to learn how this works.
           </Text>
         </View>
       );
@@ -85,7 +107,7 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
       longTimeAgo.setDate(longTimeAgo.getDate() - colors.red);
       shortTimeAgo.setDate(shortTimeAgo.getDate() - colors.orange);
       if (d < longTimeAgo) {
-        return "#d5b5c4";
+        return "#ffbaba";
       } else if (d < shortTimeAgo) {
         return "#FFD3A3";
       } else {
@@ -134,7 +156,7 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
               {getFormattedDate(chapter.date)}
             </Button>
             <ListItem.Title style={styles.title}>
-              <Text>{chapter.name}</Text>
+              <Text>{arabicTrue ? chapter.name : chapter.transliteration}</Text>
             </ListItem.Title>
           </View>
         </ListItem.Content>
@@ -144,22 +166,25 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
 
   const renderCalendar = () => {
     return (
-      <View style={styles.modalContainer}>
-        <DateTimePicker
-          value={selectedDate}
-          mode="date"
-          display="inline"
-          onChange={handleDateSelect}
-          maximumDate={new Date()}
-        />
-      </View>
+      <DateTimePicker
+        value={selectedDate}
+        mode="date"
+        display="inline"
+        onChange={handleDateSelect}
+        maximumDate={new Date()}
+        accentColor="#8c7851"
+      />
     );
   };
 
   return (
     <View>
       <ScrollView style={{ paddingTop: 8 }}>{renderChapters()}</ScrollView>
-      <Overlay isVisible={showDatePicker} onBackdropPress={toggleOverlay}>
+      <Overlay
+        isVisible={showDatePicker}
+        onBackdropPress={toggleOverlay}
+        overlayStyle={{ borderRadius: 20 }}
+      >
         {renderCalendar()}
       </Overlay>
     </View>
@@ -175,12 +200,6 @@ const styles = StyleSheet.create({
   title: {
     flex: 1,
     textAlign: "right",
-  },
-  modalContainer: {
-    backgroundColor: "white",
-    padding: 20,
-    margin: 20,
-    borderRadius: 8,
   },
   titleContainer: {
     flexDirection: "row",

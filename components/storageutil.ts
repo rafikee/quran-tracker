@@ -3,6 +3,7 @@ import allChapters from "../assets/chapters.json";
 
 const STORAGE_KEY = "chapters";
 const STORAGE_DAYS_KEY = "days";
+const STORAGE_LANG_KEY = "lang";
 
 export interface Chapter {
   id: number;
@@ -66,6 +67,8 @@ export const resetData = async (): Promise<Chapter[]> => {
   return [];
 };
 
+///// Get and set color coding
+
 export const updateDays = async (data: days): Promise<void> => {
   try {
     await AsyncStorage.setItem(STORAGE_DAYS_KEY, JSON.stringify(data));
@@ -87,5 +90,31 @@ export const getDays = async (): Promise<days> => {
   } catch (error) {
     console.log("Error retrieving data:", error);
     return { orange: 7, red: 14 };
+  }
+};
+
+///// Get and set language
+
+export const updateLang = async (data: boolean): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(STORAGE_LANG_KEY, JSON.stringify(data));
+  } catch (error) {
+    data = true;
+    await AsyncStorage.setItem(STORAGE_LANG_KEY, JSON.stringify(data));
+    console.log("Error saving data:", error);
+  }
+};
+
+export const getLang = async (): Promise<boolean> => {
+  try {
+    const storedData = await AsyncStorage.getItem(STORAGE_LANG_KEY);
+    if (storedData !== null) {
+      return JSON.parse(storedData);
+    } else {
+      return true;
+    }
+  } catch (error) {
+    console.log("Error retrieving data:", error);
+    return true;
   }
 };

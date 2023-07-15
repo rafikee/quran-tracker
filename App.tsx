@@ -25,33 +25,41 @@ const App: React.FC = () => {
         <Tab
           value={index}
           onChange={handleTabChange}
-          indicatorStyle={{
-            backgroundColor: "black",
-            height: 2,
-          }}
+          disableIndicator
           style={{ backgroundColor: "#8c7851" }}
         >
           <Tab.Item
-            title="About"
+            title="Info"
             titleStyle={{ fontSize: 12, color: "#f9f4ef", fontWeight: "bold" }}
-            icon={{
-              name: "info",
-              color: "#f9f4ef",
-            }}
+            icon={{ name: "info", color: "#f9f4ef" }}
+            containerStyle={(active) => ({
+              backgroundColor: active ? "#a39373" : undefined,
+            })}
           />
           <Tab.Item
             title="Edit"
             titleStyle={{ fontSize: 12, color: "#f9f4ef", fontWeight: "bold" }}
             icon={{ name: "edit", color: "#f9f4ef" }}
+            containerStyle={(active) => ({
+              backgroundColor: active ? "#a39373" : undefined,
+            })}
           />
           <Tab.Item
             title="Tracker"
             titleStyle={{ fontSize: 12, color: "#f9f4ef", fontWeight: "bold" }}
             icon={{ name: "traffic", color: "#f9f4ef" }}
+            containerStyle={(active) => ({
+              backgroundColor: active ? "#a39373" : undefined,
+            })}
           />
         </Tab>
 
-        <TabView value={index} onChange={setIndex} animationType="spring">
+        <TabView
+          value={index}
+          onChange={setIndex}
+          disableTransition={true}
+          disableSwipe
+        >
           <TabView.Item style={{ flex: 1, paddingVertical: 10 }}>
             <About />
           </TabView.Item>
