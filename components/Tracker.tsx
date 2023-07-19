@@ -1,8 +1,8 @@
 // Tracker.tsx
 import React, { useEffect, useState } from "react";
 import { ScrollView, TouchableOpacity, StyleSheet, View } from "react-native";
-import { ListItem, Overlay, Button, Text, SocialIcon } from "@rneui/themed";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { ListItem, Button, Text, SocialIcon } from "@rneui/themed";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import {
   getData,
   setData,
@@ -22,7 +22,6 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
   const [arabicTrue, setArabicTrue] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedChapterId, setSelectedChapterId] = useState<number | null>(
     null
   );
@@ -68,20 +67,12 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
     setShowDatePicker(true);
   };
 
-  const handleDateSelect = (event: any, date?: Date) => {
+  const handleDateSelect = (date: Date) => {
     setShowDatePicker(false);
-    if (date) {
-      if (selectedChapterId !== null) {
-        const updatedChapters = chapters.map((chapter) =>
-          chapter.id === selectedChapterId ? { ...chapter, date } : chapter
-        );
-        setData(updatedChapters, setChapters);
-      }
-    }
-  };
-
-  const toggleOverlay = () => {
-    setShowDatePicker(!showDatePicker);
+    const updatedChapters = chapters.map((chapter) =>
+      chapter.id === selectedChapterId ? { ...chapter, date } : chapter
+    );
+    setData(updatedChapters, setChapters);
   };
 
   const renderChapters = () => {
@@ -164,29 +155,18 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
     ));
   };
 
-  const renderCalendar = () => {
-    return (
-      <DateTimePicker
-        value={selectedDate}
-        mode="date"
-        display="inline"
-        onChange={handleDateSelect}
-        maximumDate={new Date()}
-        accentColor="#8c7851"
-      />
-    );
-  };
-
   return (
     <View>
       <ScrollView style={{ paddingTop: 8 }}>{renderChapters()}</ScrollView>
-      <Overlay
+      <DateTimePickerModal
         isVisible={showDatePicker}
-        onBackdropPress={toggleOverlay}
-        overlayStyle={{ borderRadius: 20 }}
-      >
-        {renderCalendar()}
-      </Overlay>
+        display="inline"
+        onConfirm={handleDateSelect}
+        onCancel={() => setShowDatePicker(false)}
+        maximumDate={new Date()}
+        accentColor="#8c7851"
+        buttonTextColorIOS="#8c7851"
+      />
     </View>
   );
 };
