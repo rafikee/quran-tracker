@@ -2,12 +2,20 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
 import { Button, Text, ButtonGroup } from "@rneui/themed";
-import { updateDays, updateLang, getDays, getLang } from "./storageutil";
+import {
+  updateDays,
+  updateLang,
+  getDays,
+  getLang,
+  clearData,
+} from "./storageutil";
 
 const About: React.FC = () => {
   const [orangeValue, setOrangeValue] = useState(7);
   const [redValue, setRedValue] = useState(14);
   const [selectedLanguage, setSelectedLanguage] = useState(0);
+
+  const TESTING = true;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,6 +57,32 @@ const About: React.FC = () => {
     if (redValue > orangeValue) {
       setRedValue(redValue - 1);
       updateDays({ orange: orangeValue, red: redValue });
+    }
+  };
+
+  // if we are testing we want the ability to delete all data
+  const renderMasterDelete = () => {
+    if (TESTING) {
+      return (
+        <View>
+          <View
+            style={{
+              height: 3,
+              backgroundColor: "#8c7851",
+              marginVertical: 10,
+            }}
+          />
+          <Button
+            color="red"
+            style={{ width: 200, alignSelf: "center" }}
+            onPress={clearData}
+          >
+            Delete all data
+          </Button>
+        </View>
+      );
+    } else {
+      return "";
     }
   };
 
@@ -220,6 +254,7 @@ const About: React.FC = () => {
           selectedTextStyle={{ color: "#f9f4ef" }}
         />
       </View>
+      {renderMasterDelete()}
     </ScrollView>
   );
 };

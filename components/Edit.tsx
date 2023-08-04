@@ -86,10 +86,10 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
     setShowModify(false); // Hide the Overlay when clicking outside
   };
 
-  // Handle clicking outside the overlay
+  // Handle changing the selection
   const buttonChange = async (id: number) => {
-    setSelectedFormat(id);
     await updateFormat(id);
+    setSelectedFormat(id);
   };
 
   const renderChapters = () => {
@@ -100,6 +100,14 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
         >
           <Text style={{ fontSize: 16 }}>This should not show up.</Text>
         </View>
+      );
+    } else if (chapters.length === 0) {
+      return (
+        <Text style={{ alignSelf: "center", padding: 20 }}>
+          Please click{" "}
+          <Text style={{ fontWeight: "bold" }}>Change the format </Text>above
+          and add items to your list.
+        </Text>
       );
     }
     return chapters.map((chapter) => (
@@ -158,18 +166,17 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
           <Text
             style={{
               alignSelf: "center",
-              paddingBottom: 10,
+              paddingBottom: 20,
               fontSize: 16,
             }}
           >
             Create your own custom list below
           </Text>
-          <InputComponent />
+          <InputComponent onDone={handleSave} />
         </View>
       );
     }
   };
-
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={{ paddingVertical: 8 }}>
@@ -195,6 +202,7 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
         isVisible={showModify}
         overlayStyle={{
           minHeight: 200,
+          maxHeight: 700,
           width: 350,
           borderRadius: 9,
           backgroundColor: "#f9f4ef",
@@ -233,18 +241,20 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
           <View style={{ paddingTop: 10, paddingHorizontal: 10 }}>
             {renderContent()}
           </View>
-          <Button
-            style={{
-              paddingVertical: 10,
-              alignSelf: "center",
-            }}
-            buttonStyle={{ width: 75 }}
-            color={"#8c7851"}
-            radius={"sm"}
-            onPress={handleSave}
-          >
-            Done
-          </Button>
+          {selectedFormat !== 2 && ( // We will show a different done button in Custom formatting
+            <Button
+              style={{
+                paddingVertical: 10,
+                alignSelf: "center",
+              }}
+              buttonStyle={{ width: 75 }}
+              color={"#8c7851"}
+              radius={"sm"}
+              onPress={handleSave}
+            >
+              Done
+            </Button>
+          )}
           <Text
             style={{
               alignSelf: "center",

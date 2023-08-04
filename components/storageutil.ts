@@ -25,6 +25,11 @@ export interface days {
   red: number;
 }
 
+// Clear data for testing
+export const clearData = async () => {
+  AsyncStorage.clear();
+};
+
 // Get and set data
 export const getData = async (): Promise<Chapter[]> => {
   try {
@@ -32,7 +37,6 @@ export const getData = async (): Promise<Chapter[]> => {
     if (storedData !== null) {
       return JSON.parse(storedData);
     } else {
-      console.log("No data found, resetting data");
       const defaultData = resetData();
       return defaultData;
     }
@@ -47,6 +51,14 @@ export const setData = async (
   setChapters: (chapters: Chapter[]) => void
 ): Promise<void> => {
   try {
+    const format = await getFormat();
+    if (format == 0) {
+      await AsyncStorage.setItem(STORAGE_KEY_SURAH, JSON.stringify(data));
+    } else if (format == 1) {
+      await AsyncStorage.setItem(STORAGE_KEY_JUZ, JSON.stringify(data));
+    } else {
+      await AsyncStorage.setItem(STORAGE_KEY_CUSTOM, JSON.stringify(data));
+    }
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     setChapters(data);
   } catch (error) {
@@ -57,12 +69,22 @@ export const setData = async (
 // Get and set custom data
 export const getCustomData = async (): Promise<Chapter[]> => {
   try {
-    const storedData = await AsyncStorage.getItem(STORAGE_KEY);
+    const storedData = await AsyncStorage.getItem(STORAGE_KEY_CUSTOM);
     if (storedData !== null) {
       return JSON.parse(storedData);
     } else {
-      console.log("No data found, resetting data");
-      const defaultData = resetData();
+      console.log("No data found, resetting custom data");
+      const defaultData = [
+        {
+          id: 1,
+          name: "Add entry",
+          review: false,
+          date: "Not reviewed",
+          transliteration: "Add entry",
+          total_verses: null,
+          type: null,
+        },
+      ];
       return defaultData;
     }
   } catch (error) {
@@ -73,7 +95,6 @@ export const getCustomData = async (): Promise<Chapter[]> => {
 
 export const setCustomData = async (data: Chapter[]): Promise<void> => {
   try {
-    console.log(data);
     await AsyncStorage.setItem(STORAGE_KEY_CUSTOM, JSON.stringify(data));
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (error) {
@@ -90,8 +111,17 @@ export const resetData = async (): Promise<Chapter[]> => {
   } else if (format === 1) {
     data = allJuz;
   } else {
-    data = allChapters;
-    updateFormat(0);
+    data = [
+      {
+        id: 1,
+        name: "Add entry",
+        review: false,
+        date: "Not reviewed",
+        transliteration: "Add entry",
+        total_verses: null,
+        type: null,
+      },
+    ];
   }
   const defaultChapters = data.map((chapter: any) => ({
     id: chapter.id,
@@ -167,7 +197,7 @@ export const getLang = async (): Promise<boolean> => {
 
 export const updateFormat = async (data: number): Promise<boolean> => {
   try {
-    const oldFormat = getFormat();
+    const oldFormat = await getFormat();
     await AsyncStorage.setItem(STORAGE_FORMAT_KEY, JSON.stringify(data));
     const good = await updateDataset(await oldFormat);
     if (good) {
@@ -237,6 +267,8 @@ export const updateDataset = async (oldFormat: number): Promise<boolean> => {
         await AsyncStorage.setItem(STORAGE_KEY, newData);
       } else {
         resetData();
+        console.log("User has no custom list data, start from scratch...");
+        return true;
       }
     } else {
       console.log("Error updating dataset");

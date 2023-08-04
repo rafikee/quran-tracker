@@ -1,27 +1,59 @@
 import React, { useState, useEffect } from "react";
 import { ListItem, Icon, Button, Dialog, Text } from "@rneui/themed";
-import { View } from "react-native";
+import { View, ScrollView } from "react-native";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
-import { setCustomData, Chapter } from "./storageutil";
+import { setCustomData, getCustomData, updateFormat } from "./storageutil";
 
 export interface Item {
   key: string; // unique key for each entry
   id: number; // this will be based on the sort order of the user
   name: string;
   enableInput: boolean; // to turn on or off the edit for each field
+  review: boolean;
+  date: Date | string;
 }
 
-const InputComponent: React.FC = () => {
+// when we press the done button here we need to close the overlay in edit.tsx
+interface InputComponentProps {
+  onDone: () => void;
+}
+
+const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
   const [dialogVisible, setDialogVisible] = useState<boolean>(false);
   const [currentKey, setCurrentKey] = useState<string | null>(null);
   const [focusedInputKey, setFocusedInputKey] = useState<string | null>(null);
   const [items, setItems] = useState<Item[]>([
-    { key: uuidv4(), id: 1, name: "Add entry", enableInput: false },
-    { key: uuidv4(), id: 2, name: "Add entry", enableInput: false },
-    { key: uuidv4(), id: 3, name: "Add entry", enableInput: false },
-    { key: uuidv4(), id: 4, name: "Add entry", enableInput: false },
+    {
+      key: uuidv4(),
+      id: 1,
+      name: "Add entry",
+      enableInput: false,
+      review: false,
+      date: "Not reviewed",
+    },
   ]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await updateFormat(2);
+        const result = await getCustomData();
+        const data = result.map((item) => ({
+          key: uuidv4(),
+          id: item.id,
+          name: item.name,
+          enableInput: false,
+          date: item.date,
+          review: item.review,
+        }));
+        setItems(data);
+      } catch (error) {
+        console.error("Error fetching data :(...", error);
+      }
+    };
+    fetchData();
+  }, []);
 
   // move an item up in the sort order
   const moveItemUp = async (index: number) => {
@@ -36,8 +68,12 @@ const InputComponent: React.FC = () => {
       const updatedSortedItems = updatedItems.map((item, idx) => ({
         ...item,
         id: idx + 1,
+        transliteration: item.name,
+        total_verses: null,
+        type: null,
       }));
       setItems(updatedSortedItems);
+      setCustomData(updatedSortedItems);
     }
   };
 
@@ -54,8 +90,12 @@ const InputComponent: React.FC = () => {
       const updatedSortedItems = updatedItems.map((item, idx) => ({
         ...item,
         id: idx + 1,
+        transliteration: item.name,
+        total_verses: null,
+        type: null,
       }));
       setItems(updatedSortedItems);
+      setCustomData(updatedSortedItems);
     }
   };
 
@@ -72,6 +112,8 @@ const InputComponent: React.FC = () => {
       id: newItemId,
       name: `Add entry`,
       enableInput: true,
+      review: false,
+      date: "Not reviewed",
     };
     const newItems = [...updatedItems, newItem];
     setItems(newItems);
@@ -86,8 +128,12 @@ const InputComponent: React.FC = () => {
     const updatedSortedItems = updatedItems.map((item, idx) => ({
       ...item,
       id: idx + 1,
+      transliteration: item.name,
+      total_verses: null,
+      type: null,
     }));
     setItems(updatedSortedItems);
+    setCustomData(updatedSortedItems);
     setDialogVisible(false);
     setCurrentKey(null);
   };
@@ -124,13 +170,106 @@ const InputComponent: React.FC = () => {
     const data = updatedItems.map((item) => ({
       id: item.id,
       name: item.name,
-      review: false,
-      date: "not reviewed",
+      review: item.review,
+      date: item.date,
       transliteration: item.name,
       total_verses: null,
       type: null,
     }));
     setCustomData(data);
+  };
+
+  const handleDone = async () => {
+    const data = items.map((item) => ({
+      id: item.id,
+      name: item.name,
+      review: item.review,
+      date: item.date,
+      transliteration: item.name,
+      total_verses: null,
+      type: null,
+    }));
+    setCustomData(data);
+  };
+
+  const renderList = () => {
+    return items.map((item, index) => (
+      <View
+        key={item.key}
+        style={{
+          flexDirection: "row",
+          marginBottom: 5, // Increase spacing between buttons
+        }}
+      >
+        <Icon
+          name="delete"
+          size={20}
+          color={"#8c7851"}
+          onPress={() => handleDeleteIcon(item.key)}
+          style={{ paddingRight: 10, paddingTop: 10 }}
+        />
+        <ListItem
+          containerStyle={{
+            padding: 5,
+            width: 200,
+            height: 30,
+            borderRadius: 10,
+            backgroundColor: "white",
+            marginVertical: 5,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <ListItem.Input
+            placeholder={item.name}
+            inputStyle={{ textAlign: "left" }}
+            disabled={!item.enableInput}
+            autoCorrect={false}
+            autoFocus={focusedInputKey === item.key}
+            onPressIn={() => {
+              toggleEnableInput(item);
+              setFocusedInputKey(item.key);
+            }}
+            onEndEditing={(e: any) => {
+              const value = e.nativeEvent.text;
+              if (value != "") {
+                handleUpdate(item.key, value);
+              } else {
+                handleUpdate(item.key, "Add entry");
+              }
+            }}
+            onBlur={() => {
+              if (item.enableInput) {
+                toggleEnableInput(item);
+              }
+            }}
+            returnKeyType="done"
+            maxLength={20}
+          />
+        </ListItem>
+        {index > 0 ? (
+          <Icon
+            name="expand-less"
+            size={40}
+            color={"#8c7851"}
+            onPress={() => moveItemUp(index)}
+          />
+        ) : (
+          <View style={{ width: 40, height: 40 }} /> // Empty place holder because we don't need top arrow
+        )}
+        {index < items.length - 1 ? (
+          <Icon
+            size={40}
+            color={"#8c7851"}
+            name="expand-more"
+            onPress={() => moveItemDown(index)}
+          />
+        ) : (
+          <View style={{ width: 40, height: 40 }} /> // Empty place holder because we don't need bottom arrow
+        )}
+      </View>
+    ));
   };
 
   return (
@@ -168,91 +307,37 @@ const InputComponent: React.FC = () => {
           />
         </Dialog.Actions>
       </Dialog>
-      {items.map((item, index) => (
-        <View
-          key={item.key}
-          style={{
-            flexDirection: "row",
-            marginBottom: 5, // Increase spacing between buttons
+      <ScrollView style={{ maxHeight: 400 }}>
+        {renderList()}
+        <Button
+          title="New entry"
+          onPress={() => {
+            addNewItem();
           }}
-        >
-          <Icon
-            name="delete"
-            size={20}
-            color={"#8c7851"}
-            onPress={() => handleDeleteIcon(item.key)}
-            style={{ paddingRight: 10, paddingTop: 10 }}
-          />
-          <ListItem
-            containerStyle={{
-              padding: 5,
-              width: 200,
-              height: 30,
-              borderRadius: 10,
-              backgroundColor: "white",
-              marginVertical: 5,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <ListItem.Input
-              placeholder={item.name}
-              inputStyle={{ textAlign: "left" }}
-              disabled={!item.enableInput}
-              autoCorrect={false}
-              autoFocus={focusedInputKey === item.key}
-              onPressIn={() => {
-                toggleEnableInput(item);
-                setFocusedInputKey(item.key);
-              }}
-              onEndEditing={(e: any) => {
-                handleUpdate(item.key, e.nativeEvent.text);
-              }}
-              onBlur={() => {
-                if (item.enableInput) {
-                  toggleEnableInput(item);
-                }
-              }}
-              returnKeyType="done"
-              maxLength={20}
-            />
-          </ListItem>
-          {index > 0 ? (
-            <Icon
-              name="expand-less"
-              size={40}
-              color={"#8c7851"}
-              onPress={() => moveItemUp(index)}
-            />
-          ) : (
-            <View style={{ width: 40, height: 40 }} /> // Empty place holder because we don't need top arrow
-          )}
-          {index < items.length - 1 ? (
-            <Icon
-              size={40}
-              color={"#8c7851"}
-              name="expand-more"
-              onPress={() => moveItemDown(index)}
-            />
-          ) : (
-            <View style={{ width: 40, height: 40 }} /> // Empty place holder because we don't need bottom arrow
-          )}
-        </View>
-      ))}
+          radius={15}
+          style={{ width: 120, paddingVertical: 10, alignSelf: "center" }}
+          color={"#8c7851"}
+          type="outline"
+          buttonStyle={{ borderColor: "#8c7851" }}
+          titleStyle={{ fontSize: 16, color: "#8c7851", paddingHorizontal: 5 }}
+          icon={<Icon name="add-circle" size={20} color="#8c7851" />}
+        />
+      </ScrollView>
       <Button
-        title="New entry"
-        onPress={() => {
-          addNewItem();
+        style={{
+          paddingVertical: 10,
+          alignSelf: "center",
         }}
-        radius={15}
-        style={{ width: 120, paddingVertical: 10 }}
+        buttonStyle={{ width: 75 }}
         color={"#8c7851"}
-        type="outline"
-        buttonStyle={{ borderColor: "#8c7851" }}
-        titleStyle={{ fontSize: 16, color: "#8c7851", paddingHorizontal: 5 }}
-        icon={<Icon name="add-circle" size={20} color="#8c7851" />}
-      />
+        radius={"sm"}
+        onPress={() => {
+          handleDone();
+          onDone(); // Call the onDone function from props
+        }}
+      >
+        Done
+      </Button>
     </View>
   );
 };
