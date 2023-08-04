@@ -1,7 +1,23 @@
 import { View, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
-import { ListItem, Text, SocialIcon } from "@rneui/themed";
+import {
+  ListItem,
+  Text,
+  SocialIcon,
+  Icon,
+  Overlay,
+  ButtonGroup,
+  Button,
+} from "@rneui/themed";
 import React, { useEffect, useState } from "react";
-import { getData, setData, Chapter, getLang } from "./storageutil";
+import {
+  getData,
+  setData,
+  Chapter,
+  getLang,
+  updateFormat,
+  getFormat,
+} from "./storageutil";
+import InputComponent from "./Input";
 
 interface TrackerProps {
   refreshData: boolean;
@@ -11,6 +27,9 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [arabicTrue, setArabicTrue] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [showModify, setShowModify] = useState(false);
+  const [selectedFormat, setSelectedFormat] = useState(0);
+  const [updatePage, setUpdatePage] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -20,13 +39,15 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
         setChapters(result);
         const lang = await getLang();
         setArabicTrue(lang);
+        const format = await getFormat();
+        setSelectedFormat(format);
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching data :(...", error);
       }
     };
     fetchData();
-  }, [refreshData]);
+  }, [refreshData, updatePage]);
 
   if (isLoading) {
     // Display loading indicator while data is being fetched
@@ -47,6 +68,28 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
         : chapter
     );
     await setData(updatedChapters, setChapters);
+  };
+
+  // When the user clicks the modify button, show the Overlay
+  const handleModify = () => {
+    setShowModify(true);
+  };
+
+  // Handle clicking outside the overlay
+  const handleBackdropPress = async () => {
+    return null;
+  };
+
+  // Handle clicking the save button
+  const handleSave = async () => {
+    setUpdatePage(!updatePage);
+    setShowModify(false); // Hide the Overlay when clicking outside
+  };
+
+  // Handle clicking outside the overlay
+  const buttonChange = async (id: number) => {
+    setSelectedFormat(id);
+    await updateFormat(id);
   };
 
   const renderChapters = () => {
@@ -83,9 +126,137 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
       </TouchableOpacity>
     ));
   };
+
+  const renderContent = () => {
+    if (selectedFormat === 0) {
+      return (
+        <Text
+          style={{
+            alignSelf: "center",
+            fontSize: 16,
+            paddingBottom: 5,
+          }}
+        >
+          Track your review progress by each Surah
+        </Text>
+      );
+    } else if (selectedFormat === 1) {
+      return (
+        <Text
+          style={{
+            alignSelf: "center",
+            fontSize: 16,
+            paddingBottom: 5,
+          }}
+        >
+          Track your review progress by each Juz
+        </Text>
+      );
+    } else {
+      return (
+        <View>
+          <Text
+            style={{
+              alignSelf: "center",
+              paddingBottom: 10,
+              fontSize: 16,
+            }}
+          >
+            Create your own custom list below
+          </Text>
+          <InputComponent />
+        </View>
+      );
+    }
+  };
+
   return (
-    <View>
-      <ScrollView style={{ paddingTop: 8 }}>{renderChapters()}</ScrollView>
+    <View style={{ flex: 1 }}>
+      <ScrollView style={{ paddingVertical: 8 }}>
+        <Button
+          onPress={handleModify}
+          radius={"sm"}
+          style={{
+            marginHorizontal: 40,
+            maxWidth: 200,
+            paddingBottom: 5,
+            alignSelf: "center",
+          }}
+          color={"#f9f4ef"}
+          type="outline"
+          buttonStyle={{ borderColor: "#8c7851" }}
+        >
+          <Text style={{ color: "#8c7851" }}>Change the format </Text>
+          <Icon name="settings" color={"#8c7851"} size={20} />
+        </Button>
+        {renderChapters()}
+      </ScrollView>
+      <Overlay
+        isVisible={showModify}
+        overlayStyle={{
+          minHeight: 200,
+          width: 350,
+          borderRadius: 9,
+          backgroundColor: "#f9f4ef",
+        }}
+        onBackdropPress={handleBackdropPress}
+      >
+        <View>
+          <Text
+            style={{
+              alignSelf: "center",
+              paddingTop: 10,
+              paddingHorizontal: 10,
+              fontWeight: "bold",
+              fontSize: 16,
+            }}
+          >
+            Select a format for tracking
+          </Text>
+          <ButtonGroup
+            buttons={["Surah", "Juz", "Custom"]}
+            selectedIndex={selectedFormat}
+            textStyle={{ fontSize: 16, color: "#8c7851" }}
+            onPress={(value) => {
+              buttonChange(value);
+            }}
+            containerStyle={{
+              marginTop: 10,
+              width: 220,
+              alignSelf: "center",
+              backgroundColor: "#f9f4ef",
+            }}
+            selectedButtonStyle={{ backgroundColor: "#8c7851" }}
+            selectedTextStyle={{ color: "#f9f4ef" }}
+          />
+
+          <View style={{ paddingTop: 10, paddingHorizontal: 10 }}>
+            {renderContent()}
+          </View>
+          <Button
+            style={{
+              paddingVertical: 10,
+              alignSelf: "center",
+            }}
+            buttonStyle={{ width: 75 }}
+            color={"#8c7851"}
+            radius={"sm"}
+            onPress={handleSave}
+          >
+            Done
+          </Button>
+          <Text
+            style={{
+              alignSelf: "center",
+              fontSize: 14,
+              fontStyle: "italic",
+              paddingTop: 5,
+            }}
+          >
+            *The data is saved independently for each format{"\n"}
+          </Text>
+        </View>
+      </Overlay>
     </View>
   );
 };

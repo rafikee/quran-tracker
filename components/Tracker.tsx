@@ -1,7 +1,7 @@
 // Tracker.tsx
 import React, { useEffect, useState } from "react";
 import { ScrollView, TouchableOpacity, StyleSheet, View } from "react-native";
-import { ListItem, Button, Text, SocialIcon } from "@rneui/themed";
+import { ListItem, Button, Text, SocialIcon, Icon } from "@rneui/themed";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import {
   getData,
@@ -11,13 +11,13 @@ import {
   days,
   getLang,
 } from "./storageutil";
-
 interface TrackerProps {
   refreshData: boolean;
 }
 
 const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
   const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [previousChapters, setPreviousChapters] = useState<Chapter[][]>([]); // new state variable to keep track of previous states
   const [colors, setColors] = useState<days>({ orange: 7, red: 14 });
   const [arabicTrue, setArabicTrue] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -32,6 +32,12 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
         setIsLoading(true);
         const result = await getData();
         setChapters(result);
+        setPreviousChapters([result]);
+        /* Can turn this in the future if we want to allow undoing even if editing the chapters
+        only initialize previous state if it hasn't been initialized yet
+        if (previousChapters.length === 0) {
+          setPreviousChapters([result]);
+        }*/
         const result_days = await getDays();
         setColors(result_days);
         const lang = await getLang();
@@ -59,6 +65,15 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
     const updatedChapters = chapters.map((chapter) =>
       chapter.id === id ? { ...chapter, date: currentDate } : chapter
     );
+    setPreviousChapters([...previousChapters, updatedChapters]); // push current state onto previous states
+    await setData(updatedChapters, setChapters);
+  };
+
+  const handleChapterReset = async (id: number) => {
+    const updatedChapters = chapters.map((chapter) =>
+      chapter.id === id ? { ...chapter, date: "Not reviewed" } : chapter
+    );
+    setPreviousChapters([...previousChapters, updatedChapters]); // push current state onto previous states
     await setData(updatedChapters, setChapters);
   };
 
@@ -67,12 +82,22 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
     setShowDatePicker(true);
   };
 
-  const handleDateSelect = (date: Date) => {
+  const handleDateSelect = async (date: Date) => {
     setShowDatePicker(false);
     const updatedChapters = chapters.map((chapter) =>
       chapter.id === selectedChapterId ? { ...chapter, date } : chapter
     );
-    setData(updatedChapters, setChapters);
+    setPreviousChapters([...previousChapters, updatedChapters]); // push current state onto previous states
+    await setData(updatedChapters, setChapters);
+  };
+
+  const handleUndo = () => {
+    if (previousChapters.length > 1) {
+      // only undo if there are previous states
+      const previousState = previousChapters[previousChapters.length - 2]; // get previous state
+      setPreviousChapters(previousChapters.slice(0, -1)); // remove current state from previous states
+      setData(previousState, setChapters);
+    }
   };
 
   const renderChapters = () => {
@@ -123,10 +148,13 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
       return d.toLocaleDateString("en-US", options);
     };
 
-    const reviewedChapters = chapters.filter((chapter) => chapter.review);
+    const reviewedChapters = chapters
+      .filter((chapter) => chapter.review) // we only want the chapters that are being reviewed
+      .sort((a, b) => a.id - b.id); // sort by the id field
     return reviewedChapters.map((chapter) => (
       <TouchableOpacity
         onPress={() => handleChapterClick(chapter.id)}
+        onLongPress={() => handleChapterReset(chapter.id)}
         key={chapter.id}
         style={styles.button}
         activeOpacity={0.4}
@@ -155,9 +183,30 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
     ));
   };
 
+  const renderUndo = () => {
+    if (chapters.filter((chapter) => chapter.review).length > 0) {
+      return (
+        <Button
+          onPress={handleUndo}
+          radius={"sm"}
+          style={{
+            marginHorizontal: 40,
+            marginVertical: 5,
+            maxWidth: 50,
+          }}
+          color={"#8c7851"}
+          disabled={previousChapters.length < 2}
+        >
+          <Icon name="undo" color={"white"} />
+        </Button>
+      );
+    }
+  };
+
   return (
     <View>
       <ScrollView style={{ paddingTop: 8 }}>{renderChapters()}</ScrollView>
+      {renderUndo()}
       <DateTimePickerModal
         isVisible={showDatePicker}
         display="inline"

@@ -1,9 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import allChapters from "../assets/chapters.json";
+import allJuz from "../assets/juzs.json";
 
-const STORAGE_KEY = "chapters";
+const STORAGE_KEY = "chapters"; // the key for the active dataset
+const STORAGE_KEY_JUZ = "juz";
+const STORAGE_KEY_SURAH = "surahs";
+const STORAGE_KEY_CUSTOM = "custom";
 const STORAGE_DAYS_KEY = "days";
 const STORAGE_LANG_KEY = "lang";
+const STORAGE_FORMAT_KEY = "format";
 
 export interface Chapter {
   id: number;
@@ -20,6 +25,7 @@ export interface days {
   red: number;
 }
 
+// Get and set data
 export const getData = async (): Promise<Chapter[]> => {
   try {
     const storedData = await AsyncStorage.getItem(STORAGE_KEY);
@@ -48,8 +54,46 @@ export const setData = async (
   }
 };
 
+// Get and set custom data
+export const getCustomData = async (): Promise<Chapter[]> => {
+  try {
+    const storedData = await AsyncStorage.getItem(STORAGE_KEY);
+    if (storedData !== null) {
+      return JSON.parse(storedData);
+    } else {
+      console.log("No data found, resetting data");
+      const defaultData = resetData();
+      return defaultData;
+    }
+  } catch (error) {
+    console.log("Error retrieving data:", error);
+  }
+  return [];
+};
+
+export const setCustomData = async (data: Chapter[]): Promise<void> => {
+  try {
+    console.log(data);
+    await AsyncStorage.setItem(STORAGE_KEY_CUSTOM, JSON.stringify(data));
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.log("Error saving data:", error);
+  }
+};
+
+// reset data
 export const resetData = async (): Promise<Chapter[]> => {
-  const defaultChapters = allChapters.map((chapter) => ({
+  const format = await getFormat();
+  let data;
+  if (format === 0) {
+    data = allChapters;
+  } else if (format === 1) {
+    data = allJuz;
+  } else {
+    data = allChapters;
+    updateFormat(0);
+  }
+  const defaultChapters = data.map((chapter: any) => ({
     id: chapter.id,
     name: chapter.name,
     review: chapter.review,
@@ -116,5 +160,91 @@ export const getLang = async (): Promise<boolean> => {
   } catch (error) {
     console.log("Error retrieving data:", error);
     return true;
+  }
+};
+
+///// Get and set format for surahs
+
+export const updateFormat = async (data: number): Promise<boolean> => {
+  try {
+    const oldFormat = getFormat();
+    await AsyncStorage.setItem(STORAGE_FORMAT_KEY, JSON.stringify(data));
+    const good = await updateDataset(await oldFormat);
+    if (good) {
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.log("Error changing format:", error);
+    return false;
+  }
+};
+
+export const getFormat = async (): Promise<number> => {
+  try {
+    const storedData = await AsyncStorage.getItem(STORAGE_FORMAT_KEY);
+    if (storedData !== null) {
+      return JSON.parse(storedData);
+    } else {
+      return 0;
+    }
+  } catch (error) {
+    console.log("Error retrieving data:", error);
+    return 0;
+  }
+};
+
+///// Update the main dataset
+// 0: surah, 1: juz, 2: custom
+
+export const updateDataset = async (oldFormat: number): Promise<boolean> => {
+  try {
+    const data = await getData(); // get the current dataset
+    const newFormat = await getFormat(); // get the new format
+    if (oldFormat === 0) {
+      // if format was surahs
+      await AsyncStorage.setItem(STORAGE_KEY_SURAH, JSON.stringify(data));
+    } else if (oldFormat === 1) {
+      // if format was juzs
+      await AsyncStorage.setItem(STORAGE_KEY_JUZ, JSON.stringify(data));
+    } else if (oldFormat === 2) {
+      // if format was juzs
+      await AsyncStorage.setItem(STORAGE_KEY_CUSTOM, JSON.stringify(data));
+    } else {
+      console.log("Error updating dataset");
+    }
+
+    if (newFormat === 0) {
+      // if format is surahs
+      const newData = await AsyncStorage.getItem(STORAGE_KEY_SURAH);
+      if (newData !== null) {
+        await AsyncStorage.setItem(STORAGE_KEY, newData);
+      } else {
+        resetData();
+      }
+    } else if (newFormat === 1) {
+      // if format is juzs
+      const newData = await AsyncStorage.getItem(STORAGE_KEY_JUZ);
+      if (newData !== null) {
+        await AsyncStorage.setItem(STORAGE_KEY, newData);
+      } else {
+        resetData();
+      }
+    } else if (newFormat === 2) {
+      // if format is custom
+      const newData = await AsyncStorage.getItem(STORAGE_KEY_CUSTOM);
+      if (newData !== null) {
+        await AsyncStorage.setItem(STORAGE_KEY, newData);
+      } else {
+        resetData();
+      }
+    } else {
+      console.log("Error updating dataset");
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.log("Error updating dataset:", error);
+    return false;
   }
 };

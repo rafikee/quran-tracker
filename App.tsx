@@ -20,8 +20,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <SafeAreaProvider style={{ backgroundColor: "#f9f4ef" }}>
-      <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaProvider>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#f9f4ef" }}>
         <Tab
           value={index}
           onChange={handleTabChange}
@@ -37,9 +37,9 @@ const App: React.FC = () => {
             })}
           />
           <Tab.Item
-            title="Edit"
+            title="Chapters"
             titleStyle={{ fontSize: 12, color: "#f9f4ef", fontWeight: "bold" }}
-            icon={{ name: "edit", color: "#f9f4ef" }}
+            icon={{ name: "list", color: "#f9f4ef" }}
             containerStyle={(active) => ({
               backgroundColor: active ? "#a39373" : undefined,
             })}
@@ -66,7 +66,7 @@ const App: React.FC = () => {
           <TabView.Item style={{ flex: 1, paddingVertical: 10 }}>
             <Edit refreshData={refreshData} />
           </TabView.Item>
-          <TabView.Item style={{ flex: 1, paddingVertical: 10 }}>
+          <TabView.Item style={{ flex: 1, paddingTop: 10, paddingBottom: 30 }}>
             <Tracker refreshData={refreshData} />
           </TabView.Item>
         </TabView>

@@ -70,15 +70,16 @@ const About: React.FC = () => {
           How do I use it?{"\n"}
         </Text>
         <Text style={{ fontSize: 16, paddingHorizontal: 20 }}>
-          In the <Text style={{ fontWeight: "bold" }}>Edit</Text> tab, tap on
+          In the <Text style={{ fontWeight: "bold" }}>Surahs</Text> tab, tap on
           each Surah you want to review regularly. This adds it to the Tracker.
           Tap again if you want to remove it.
           {"\n"}
           {"\n"}
           After you review a Surah, go into the{" "}
           <Text style={{ fontWeight: "bold" }}>Tracker</Text> tab and tap the
-          Surah. This updates the last review to the current date. Tap the date
-          if you want to correct it to a custom date.{"\n"}
+          Surah. This updates the last review to the current date.{"\n"}
+          {"\n"}Tap the date if you want to correct it to a custom date. Hold
+          down the Surah if you want to clear the date.{"\n"}
         </Text>
         <Text style={{ fontSize: 16, fontWeight: "bold" }}>
           Color Coding{"\n"}
