@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ListItem, Icon, Button, Dialog, Text } from "@rneui/themed";
+import { ListItem, Icon, Button, Dialog, Text, Input } from "@rneui/themed";
 import { View, ScrollView } from "react-native";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
@@ -19,15 +19,22 @@ interface InputComponentProps {
   onDone: () => void;
 }
 
+const ENTRY_LIMIT = 100; // how many entries can a user add in custom mode
+const MAX_LENGTH = 20; // max length of input string for an entry
+
 const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
-  const [dialogVisible, setDialogVisible] = useState<boolean>(false);
+  const [inputDialogVisible, setInputDialogVisible] = useState<boolean>(false);
+  const [limitDialogVisible, setLimitDialogVisible] = useState<boolean>(false);
+  const [deleteDialogVisible, setDeleteDialogVisible] =
+    useState<boolean>(false);
+  const [inputDialogValue, setInputDialogValue] = useState<string>("");
   const [currentKey, setCurrentKey] = useState<string | null>(null);
   const [focusedInputKey, setFocusedInputKey] = useState<string | null>(null);
   const [items, setItems] = useState<Item[]>([
     {
       key: uuidv4(),
       id: 1,
-      name: "Add entry",
+      name: "New entry",
       enableInput: false,
       review: false,
       date: "Not reviewed",
@@ -101,23 +108,27 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
 
   // Add a new item to the list
   const addNewItem = async () => {
-    const updatedItems = items.map((item) => ({
-      ...item,
-      enableInput: false,
-    }));
-    const newItemId = updatedItems.length + 1;
+    if (items.length < ENTRY_LIMIT) {
+      const updatedItems = items.map((item) => ({
+        ...item,
+        enableInput: false,
+      }));
+      const newItemId = updatedItems.length + 1;
 
-    const newItem: Item = {
-      key: uuidv4(),
-      id: newItemId,
-      name: `Add entry`,
-      enableInput: true,
-      review: false,
-      date: "Not reviewed",
-    };
-    const newItems = [...updatedItems, newItem];
-    setItems(newItems);
-    setFocusedInputKey(newItem.key); // Set the focused input key
+      const newItem: Item = {
+        key: uuidv4(),
+        id: newItemId,
+        name: `New entry`,
+        enableInput: true,
+        review: false,
+        date: "Not reviewed",
+      };
+      const newItems = [...updatedItems, newItem];
+      setItems(newItems);
+      showInputDialog(newItem);
+    } else {
+      setLimitDialogVisible(true);
+    }
   };
 
   // Delete an item from the list once the user confirms
@@ -134,49 +145,48 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
     }));
     setItems(updatedSortedItems);
     setCustomData(updatedSortedItems);
-    setDialogVisible(false);
+    setDeleteDialogVisible(false);
     setCurrentKey(null);
   };
 
   // When the user clicks on the delete icon next to an item
   const handleDeleteIcon = async (key: string) => {
-    await toggleEnableInput(null);
-    setDialogVisible(true);
+    setDeleteDialogVisible(true);
     setCurrentKey(key);
   };
 
-  // toggle the input of the field on an off
-  const toggleEnableInput = async (row: Item | null): Promise<void> => {
-    // if we pass an item, flip it off
-    if (row) {
-      const updatedItems = items.map((item) =>
-        item.key === row.key ? { ...item, enableInput: !row.enableInput } : item
-      );
-      setItems(updatedItems);
-    } else {
-      const updatedItems = items.map((item) => ({
-        ...item,
-        enableInput: false,
-      }));
-      setItems(updatedItems);
-    }
+  const showInputDialog = (item: Item) => {
+    setCurrentKey(item.key);
+    setInputDialogValue(item.name != "New entry" ? item.name : "");
+    setInputDialogVisible(true);
   };
 
-  const handleUpdate = async (key: string, newName: string) => {
-    const updatedItems = items.map((item) =>
-      item.key === key ? { ...item, name: newName } : item
-    );
-    setItems(updatedItems);
-    const data = updatedItems.map((item) => ({
-      id: item.id,
-      name: item.name,
-      review: item.review,
-      date: item.date,
-      transliteration: item.name,
-      total_verses: null,
-      type: null,
-    }));
-    setCustomData(data);
+  // handle the input dialog box when a user edits an entry or adds new one
+  const handleUpdate = async (key: string | null, newName: string) => {
+    if (!key) {
+      // this sould never happen
+      console.log("oops");
+    } else {
+      if (newName === "") {
+        newName = "New entry";
+      }
+      const updatedItems = items.map((item) =>
+        item.key === key ? { ...item, name: newName } : item
+      );
+      setItems(updatedItems);
+      const data = updatedItems.map((item) => ({
+        id: item.id,
+        name: item.name,
+        review: item.review,
+        date: item.date,
+        transliteration: item.name,
+        total_verses: null,
+        type: null,
+      }));
+      setCustomData(data);
+    }
+    setInputDialogVisible(false);
+    setCurrentKey(null);
   };
 
   const handleDone = async () => {
@@ -190,6 +200,92 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
       type: null,
     }));
     setCustomData(data);
+  };
+
+  const renderInputDialog = () => {
+    return (
+      <Dialog
+        isVisible={inputDialogVisible}
+        overlayStyle={{
+          borderRadius: 10,
+          backgroundColor: "#f9f4ef",
+          paddingBottom: 0,
+          paddingTop: 10,
+          paddingHorizontal: 5,
+        }}
+      >
+        <Input
+          placeholder="New entry"
+          defaultValue={inputDialogValue}
+          autoFocus={true}
+          autoCorrect={false}
+          returnKeyType="done"
+          maxLength={MAX_LENGTH}
+          onEndEditing={(e: any) => {
+            const value = e.nativeEvent.text;
+            handleUpdate(currentKey, value);
+          }}
+        />
+      </Dialog>
+    );
+  };
+
+  const renderLimitDialog = () => {
+    return (
+      <Dialog
+        isVisible={limitDialogVisible}
+        overlayStyle={{ borderRadius: 10 }}
+        onBackdropPress={() => setLimitDialogVisible(false)}
+      >
+        <Dialog.Title title="Too many entries" />
+        <Text>{`The maximum number of entries is: ` + ENTRY_LIMIT}</Text>
+        <Dialog.Actions>
+          <Dialog.Button
+            title="OK"
+            onPress={() => setLimitDialogVisible(false)}
+          />
+        </Dialog.Actions>
+      </Dialog>
+    );
+  };
+
+  // Dialog to delete
+  const renderDeleteDialog = () => {
+    return (
+      <Dialog
+        isVisible={deleteDialogVisible}
+        onBackdropPress={() => {
+          setDeleteDialogVisible(false), setCurrentKey(null);
+        }}
+        overlayStyle={{ borderRadius: 10 }}
+      >
+        <Dialog.Title title="Please confirm to delete" />
+        <Text style={{ paddingVertical: 10 }}>
+          If you have a date associated with this in the tracker it will also be
+          deleted.
+        </Text>
+
+        <Dialog.Actions>
+          <Dialog.Button
+            title="Delete"
+            buttonStyle={{ backgroundColor: "#C34A2C" }}
+            titleStyle={{ color: "white", fontWeight: "bold" }}
+            onPress={deleteItem}
+            containerStyle={{ paddingLeft: 10 }}
+          />
+          <Dialog.Button
+            title="Cancel"
+            type="outline"
+            buttonStyle={{ borderColor: "#8c7851" }}
+            titleStyle={{ color: "#8c7851" }}
+            onPress={() => {
+              setDeleteDialogVisible(false);
+              setCurrentKey(null);
+            }}
+          />
+        </Dialog.Actions>
+      </Dialog>
+    );
   };
 
   const renderList = () => {
@@ -221,31 +317,12 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
             justifyContent: "space-between",
           }}
         >
-          <ListItem.Input
-            placeholder={item.name}
-            inputStyle={{ textAlign: "left" }}
-            disabled={!item.enableInput}
-            autoCorrect={false}
-            autoFocus={focusedInputKey === item.key}
-            onPressIn={() => {
-              toggleEnableInput(item);
-              setFocusedInputKey(item.key);
-            }}
-            onEndEditing={(e: any) => {
-              const value = e.nativeEvent.text;
-              if (value != "") {
-                handleUpdate(item.key, value);
-              } else {
-                handleUpdate(item.key, "Add entry");
-              }
-            }}
-            onBlur={() => {
-              if (item.enableInput) {
-                toggleEnableInput(item);
-              }
-            }}
-            returnKeyType="done"
-            maxLength={20}
+          <ListItem.Title>{item.name}</ListItem.Title>
+          <Icon
+            name="edit"
+            size={20}
+            color={"#8c7851"}
+            onPress={() => showInputDialog(item)}
           />
         </ListItem>
         {index > 0 ? (
@@ -274,39 +351,9 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
 
   return (
     <View style={{ alignItems: "center" }}>
-      <Dialog
-        isVisible={dialogVisible}
-        onBackdropPress={() => {
-          setDialogVisible(false), setCurrentKey(null);
-        }}
-        overlayStyle={{ borderRadius: 10 }}
-      >
-        <Dialog.Title title="Please confirm to delete" />
-        <Text style={{ paddingVertical: 10 }}>
-          If you have a date associated with this in the tracker it will also be
-          deleted.
-        </Text>
-
-        <Dialog.Actions>
-          <Dialog.Button
-            title="Delete"
-            buttonStyle={{ backgroundColor: "#C34A2C" }}
-            titleStyle={{ color: "white", fontWeight: "bold" }}
-            onPress={deleteItem}
-            containerStyle={{ paddingLeft: 10 }}
-          />
-          <Dialog.Button
-            title="Cancel"
-            type="outline"
-            buttonStyle={{ borderColor: "#8c7851" }}
-            titleStyle={{ color: "#8c7851" }}
-            onPress={() => {
-              setDialogVisible(false);
-              setCurrentKey(null);
-            }}
-          />
-        </Dialog.Actions>
-      </Dialog>
+      {renderInputDialog()}
+      {renderLimitDialog()}
+      {renderDeleteDialog()}
       <ScrollView style={{ maxHeight: 400 }}>
         {renderList()}
         <Button

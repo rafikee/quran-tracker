@@ -15,7 +15,7 @@ const About: React.FC = () => {
   const [redValue, setRedValue] = useState(14);
   const [selectedLanguage, setSelectedLanguage] = useState(0);
 
-  const TESTING = true;
+  const TESTING = false; // Flip and off for testing
 
   useEffect(() => {
     const fetchData = async () => {
