@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { ListItem, Icon, Button, Dialog, Text, Input } from "@rneui/themed";
 import { View, ScrollView } from "react-native";
-import "react-native-get-random-values";
-import { v4 as uuidv4 } from "uuid";
 import { setCustomData, getCustomData, updateFormat } from "./storageutil";
 
 export interface Item {
-  key: string; // unique key for each entry
   id: number; // this will be based on the sort order of the user
   name: string;
   enableInput: boolean; // to turn on or off the edit for each field
@@ -28,10 +25,9 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
   const [deleteDialogVisible, setDeleteDialogVisible] =
     useState<boolean>(false);
   const [inputDialogValue, setInputDialogValue] = useState<string>("");
-  const [currentKey, setCurrentKey] = useState<string | null>(null);
+  const [currentKey, setCurrentKey] = useState<number | null>(null);
   const [items, setItems] = useState<Item[]>([
     {
-      key: uuidv4(),
       id: 1,
       name: "New entry",
       enableInput: false,
@@ -47,7 +43,6 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
 
         const result = await getCustomData();
         const data = result.map((item) => ({
-          key: uuidv4(),
           id: item.id,
           name: item.name,
           enableInput: false,
@@ -116,7 +111,6 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
       const newItemId = updatedItems.length + 1;
 
       const newItem: Item = {
-        key: uuidv4(),
         id: newItemId,
         name: `New entry`,
         enableInput: true,
@@ -133,7 +127,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
 
   // Delete an item from the list once the user confirms
   const deleteItem = () => {
-    const index = items.findIndex((item) => item.key === currentKey);
+    const index = items.findIndex((item) => item.id === currentKey);
     const updatedItems = [...items];
     updatedItems.splice(index, 1);
     const updatedSortedItems = updatedItems.map((item, idx) => ({
@@ -150,20 +144,20 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
   };
 
   // When the user clicks on the delete icon next to an item
-  const handleDeleteIcon = async (key: string) => {
+  const handleDeleteIcon = async (id: number) => {
     setDeleteDialogVisible(true);
-    setCurrentKey(key);
+    setCurrentKey(id);
   };
 
   const showInputDialog = (item: Item) => {
-    setCurrentKey(item.key);
+    setCurrentKey(item.id);
     setInputDialogValue(item.name != "New entry" ? item.name : "");
     setInputDialogVisible(true);
   };
 
   // handle the input dialog box when a user edits an entry or adds new one
-  const handleUpdate = async (key: string | null, newName: string) => {
-    if (!key) {
+  const handleUpdate = async (id: number | null, newName: string) => {
+    if (!id) {
       // this sould never happen
       console.log("oops");
     } else {
@@ -171,7 +165,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
         newName = "New entry";
       }
       const updatedItems = items.map((item) =>
-        item.key === key ? { ...item, name: newName } : item
+        item.id === id ? { ...item, name: newName } : item
       );
       setItems(updatedItems);
       const data = updatedItems.map((item) => ({
@@ -291,7 +285,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
   const renderList = () => {
     return items.map((item, index) => (
       <View
-        key={item.key}
+        key={item.id}
         style={{
           flexDirection: "row",
           marginBottom: 5, // Increase spacing between buttons
@@ -302,7 +296,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
           size={20}
           color={"#8c7851"}
           onPress={() => {
-            handleDeleteIcon(item.key);
+            handleDeleteIcon(item.id);
           }}
           style={{ paddingRight: 10, paddingTop: 10 }}
         />

@@ -33,11 +33,6 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
         const result = await getData();
         setChapters(result);
         setPreviousChapters([result]);
-        /* Can turn this in the future if we want to allow undoing even if editing the chapters
-        only initialize previous state if it hasn't been initialized yet
-        if (previousChapters.length === 0) {
-          setPreviousChapters([result]);
-        }*/
         const result_days = await getDays();
         setColors(result_days);
         const lang = await getLang();
