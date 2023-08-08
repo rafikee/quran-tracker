@@ -214,8 +214,9 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
           autoFocus={true}
           autoCorrect={false}
           returnKeyType="done"
+          enablesReturnKeyAutomatically={true} // only works on iOS
           maxLength={MAX_LENGTH}
-          onEndEditing={(e: any) => {
+          onSubmitEditing={(e: any) => {
             const value = e.nativeEvent.text;
             handleUpdate(currentKey, value);
           }}
