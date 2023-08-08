@@ -29,7 +29,6 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
     useState<boolean>(false);
   const [inputDialogValue, setInputDialogValue] = useState<string>("");
   const [currentKey, setCurrentKey] = useState<string | null>(null);
-  const [focusedInputKey, setFocusedInputKey] = useState<string | null>(null);
   const [items, setItems] = useState<Item[]>([
     {
       key: uuidv4(),
@@ -45,6 +44,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
     const fetchData = async () => {
       try {
         await updateFormat(2);
+
         const result = await getCustomData();
         const data = result.map((item) => ({
           key: uuidv4(),
@@ -234,7 +234,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
     return (
       <Dialog
         isVisible={limitDialogVisible}
-        overlayStyle={{ borderRadius: 10 }}
+        overlayStyle={{ borderRadius: 10, backgroundColor: "#f9f4ef" }}
         onBackdropPress={() => setLimitDialogVisible(false)}
       >
         <Dialog.Title title="Too many entries" />
@@ -257,7 +257,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
         onBackdropPress={() => {
           setDeleteDialogVisible(false), setCurrentKey(null);
         }}
-        overlayStyle={{ borderRadius: 10 }}
+        overlayStyle={{ borderRadius: 10, backgroundColor: "#f9f4ef" }}
       >
         <Dialog.Title title="Please confirm to delete" />
         <Text style={{ paddingVertical: 10 }}>
@@ -301,7 +301,9 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
           name="delete"
           size={20}
           color={"#8c7851"}
-          onPress={() => handleDeleteIcon(item.key)}
+          onPress={() => {
+            handleDeleteIcon(item.key);
+          }}
           style={{ paddingRight: 10, paddingTop: 10 }}
         />
         <ListItem
@@ -362,7 +364,11 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
             addNewItem();
           }}
           radius={15}
-          style={{ width: 120, paddingVertical: 10, alignSelf: "center" }}
+          containerStyle={{
+            width: 120,
+            paddingVertical: 10,
+            alignSelf: "center",
+          }}
           color={"#8c7851"}
           type="outline"
           buttonStyle={{ borderColor: "#8c7851" }}
@@ -371,7 +377,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
         />
       </ScrollView>
       <Button
-        style={{
+        containerStyle={{
           paddingVertical: 10,
           alignSelf: "center",
         }}
