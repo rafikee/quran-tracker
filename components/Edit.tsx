@@ -75,11 +75,6 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
     setShowModify(true);
   };
 
-  // Handle clicking outside the overlay
-  const handleBackdropPress = async () => {
-    return null;
-  };
-
   // Handle clicking the save button
   const handleSave = async () => {
     setUpdatePage(!updatePage);
@@ -183,7 +178,7 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
         <Button
           onPress={handleModify}
           radius={"sm"}
-          style={{
+          containerStyle={{
             marginHorizontal: 40,
             maxWidth: 200,
             paddingBottom: 5,
@@ -207,7 +202,6 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
           borderRadius: 9,
           backgroundColor: "#f9f4ef",
         }}
-        onBackdropPress={handleBackdropPress}
       >
         <View>
           <Text
@@ -243,7 +237,7 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
           </View>
           {selectedFormat !== 2 && ( // We will show a different done button in Custom formatting
             <Button
-              style={{
+              containerStyle={{
                 paddingVertical: 10,
                 alignSelf: "center",
               }}

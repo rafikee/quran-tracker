@@ -116,15 +116,14 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
       if (date === "Not reviewed") {
         return "#eaddcf";
       }
-      const d = new Date(date);
 
       const longTimeAgo = new Date();
       const shortTimeAgo = new Date();
       longTimeAgo.setDate(longTimeAgo.getDate() - colors.red);
       shortTimeAgo.setDate(shortTimeAgo.getDate() - colors.orange);
-      if (d < longTimeAgo) {
+      if (date < longTimeAgo) {
         return "#ffbaba";
-      } else if (d < shortTimeAgo) {
+      } else if (date < shortTimeAgo) {
         return "#FFD3A3";
       } else {
         return "#c9d5b5";
@@ -132,20 +131,18 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
     };
 
     const getFormattedDate = (date: Date | string): string => {
-      if (!date) {
+      if (!date || date === "Not reviewed") {
         return "Not reviewed";
       }
 
-      if (date === "Not reviewed") {
-        return "Not reviewed";
-      }
       const d = new Date(date);
+
       const options = {
         month: "short",
         day: "2-digit",
         year: "numeric",
       } as const;
-      return d.toLocaleDateString("en-US", options);
+      return d.toLocaleString("en-US", options);
     };
 
     const reviewedChapters = chapters
@@ -189,7 +186,7 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
         <Button
           onPress={handleUndo}
           radius={"sm"}
-          style={{
+          containerStyle={{
             marginHorizontal: 40,
             marginVertical: 5,
             maxWidth: 50,
