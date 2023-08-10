@@ -1,6 +1,6 @@
 // Tracker.tsx
 import React, { useEffect, useState } from "react";
-import { ScrollView, TouchableOpacity, StyleSheet, View } from "react-native";
+import { ScrollView, TouchableOpacity, View } from "react-native";
 import { ListItem, Button, Text, SocialIcon, Icon } from "@rneui/themed";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import {

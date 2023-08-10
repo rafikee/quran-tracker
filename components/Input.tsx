@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { ListItem, Icon, Button, Dialog, Text, Input } from "@rneui/themed";
 import { View, ScrollView } from "react-native";
 import { setCustomData, getCustomData, updateFormat } from "./storageutil";
-import { appStyles, borders, colors, iconSizes } from "../assets/styles";
+import { appStyles, colors, iconSizes } from "../assets/styles";
 
 export interface Item {
   id: number; // this will be based on the sort order of the user
