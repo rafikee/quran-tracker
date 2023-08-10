@@ -10,6 +10,8 @@ import {
   Button,
 } from "@rneui/themed";
 import React, { useEffect, useState } from "react";
+
+// Import components from other files
 import {
   getData,
   setData,
@@ -26,13 +28,20 @@ interface TrackerProps {
 }
 
 const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
+  // List of chapters objects that we display
   const [chapters, setChapters] = useState<Chapter[]>([]);
+  // Use Arabic or english, when using custom this doesn't matter
   const [arabicTrue, setArabicTrue] = useState<boolean>(true);
+  // Loading indicator is shown when we switch between tabs
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  // Show the settings pane
   const [showModify, setShowModify] = useState(false);
+  // the format of the list (Surah, Juz, Custom)
   const [selectedFormat, setSelectedFormat] = useState(0);
+  // when the user makes changes in the settings
   const [updatePage, setUpdatePage] = useState(false);
 
+  // When refreshdData or settings are updated load from storage
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -60,6 +69,7 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
     );
   }
 
+  // When a user clicks on a chapter toggle it on or off
   const handleChapterClick = async (id: number) => {
     const updatedChapters = chapters.map((chapter) =>
       chapter.id === id
@@ -77,18 +87,19 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
     setShowModify(true);
   };
 
-  // Handle clicking the save button
+  // Handle clicking the save button in settings
   const handleSave = async () => {
     setUpdatePage(!updatePage);
     setShowModify(false); // Hide the Overlay when clicking outside
   };
 
-  // Handle changing the selection
+  // Handle changing the selection wihin the settings
   const buttonChange = async (id: number) => {
     await updateFormat(id);
     setSelectedFormat(id);
   };
 
+  // Render the chapters
   const renderChapters = () => {
     if (!chapters) {
       return (
@@ -96,6 +107,7 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
           <Text style={appStyles.infoText}>This should not show up.</Text>
         </View>
       );
+      // if there are no chapters display a message
     } else if (chapters.length === 0) {
       return (
         <View style={appStyles.container}>
@@ -107,6 +119,7 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
         </View>
       );
     }
+    // render the list of chapters
     return chapters.map((chapter) => (
       <TouchableOpacity
         onPress={() => handleChapterClick(chapter.id)}
@@ -132,6 +145,7 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
     ));
   };
 
+  // render the header on the page
   const renderHeader = () => {
     return (
       <View style={appStyles.headerContainer}>
@@ -146,6 +160,7 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
     );
   };
 
+  // render the settings button
   const renderSettingsButton = () => {
     return (
       <Button onPress={handleModify} type="clear">
@@ -158,6 +173,7 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
     );
   };
 
+  // render the settings menu
   const renderSettingsMenu = () => {
     return (
       <View style={appStyles.spacer}>
@@ -195,6 +211,7 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
     );
   };
 
+  // the content of the settings menu based on each selection
   const renderSettingsContent = () => {
     if (selectedFormat === 0) {
       return (
@@ -209,6 +226,7 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
         </Text>
       );
     } else {
+      // This is the custom formatting where users make their own list
       return (
         <View>
           <Text style={[appStyles.settingsText, { paddingBottom: 20 }]}>

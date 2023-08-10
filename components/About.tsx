@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { View, ScrollView } from "react-native";
 import { Button, Text, ButtonGroup } from "@rneui/themed";
+
+// Import components from other files
 import {
   updateDays,
   updateLang,
@@ -12,12 +14,16 @@ import {
 import { appStyles, colors } from "../assets/styles";
 
 const About: React.FC = () => {
+  // number of days for each color settings also stored in async storage
   const [orangeValue, setOrangeValue] = useState(7);
   const [redValue, setRedValue] = useState(14);
+  // 0 is Arabic, 1 is English, also stored in async storage
   const [selectedLanguage, setSelectedLanguage] = useState(0);
 
-  const TESTING = false; // Flip and off for testing
+  // Flip and off for testing
+  const TESTING = false;
 
+  // Load the data when the page loads
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -33,6 +39,7 @@ const About: React.FC = () => {
     fetchData();
   }, []);
 
+  // Increase/Decrease the number of days for each color
   const handleIncreaseOrange = () => {
     if (orangeValue < redValue) {
       setOrangeValue(orangeValue + 1);
@@ -82,6 +89,7 @@ const About: React.FC = () => {
     }
   };
 
+  // render the header on the page
   const renderHeader = () => {
     return (
       <View style={appStyles.headerContainer}>
@@ -96,6 +104,7 @@ const About: React.FC = () => {
     );
   };
 
+  // render about content
   const renderAbout = () => {
     return (
       <View style={appStyles.textContainer}>
@@ -139,6 +148,7 @@ const About: React.FC = () => {
     );
   };
 
+  // render color coding settings
   const renderColorCoding = () => {
     return (
       <View style={appStyles.textContainer}>
@@ -197,6 +207,7 @@ const About: React.FC = () => {
     );
   };
 
+  // render language selector
   const renderLanguageSelector = () => {
     return (
       <View style={appStyles.textContainer}>

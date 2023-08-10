@@ -11,15 +11,16 @@ const STORAGE_LANG_KEY = "lang";
 const STORAGE_FORMAT_KEY = "format";
 
 export interface Chapter {
-  id: number;
-  name: string;
-  review: boolean;
-  date: Date | string;
-  transliteration: string | null;
-  total_verses: number | null;
-  type: string | null;
+  id: number; // unique id and also how chapters are sorted
+  name: string; // name of chapter
+  review: boolean; // whether or not chapter is in tracker
+  date: Date | string; // date of last review
+  transliteration: string | null; // name of chapter in English, if custom it will be a copy of name
+  total_verses: number | null; // total number of verses in chapter, null for custom and juz
+  type: string | null; // irrelevant for custom and juz, "Meccan" or "Medinan" for surahs
 }
 
+// other components use this to get the number of days for each color setting
 export interface days {
   orange: number;
   red: number;
@@ -30,7 +31,7 @@ export const clearData = async () => {
   AsyncStorage.clear();
 };
 
-// Get and set data
+// Get chapter data from asyncsotarge
 export const getData = async (): Promise<Chapter[]> => {
   try {
     const storedData = await AsyncStorage.getItem(STORAGE_KEY);
@@ -46,6 +47,8 @@ export const getData = async (): Promise<Chapter[]> => {
   return [];
 };
 
+// Set chapter data to async storage
+// Stores it twice, once in data and once in the respective format
 export const setData = async (
   data: Chapter[],
   setChapters: (chapters: Chapter[]) => void
@@ -66,7 +69,7 @@ export const setData = async (
   }
 };
 
-// Get and set custom data
+// Get custom data from async storage
 export const getCustomData = async (): Promise<Chapter[]> => {
   try {
     const storedData = await AsyncStorage.getItem(STORAGE_KEY_CUSTOM);
@@ -93,6 +96,7 @@ export const getCustomData = async (): Promise<Chapter[]> => {
   return [];
 };
 
+// set custom data when a user uses the custom setting
 export const setCustomData = async (data: Chapter[]): Promise<void> => {
   try {
     await AsyncStorage.setItem(STORAGE_KEY_CUSTOM, JSON.stringify(data));
@@ -102,7 +106,7 @@ export const setCustomData = async (data: Chapter[]): Promise<void> => {
   }
 };
 
-// reset data
+// reset data for a variaty of reasons, it depends on the format
 export const resetData = async (): Promise<Chapter[]> => {
   const format = await getFormat();
   let data;
@@ -142,7 +146,6 @@ export const resetData = async (): Promise<Chapter[]> => {
 };
 
 ///// Get and set color coding
-
 export const updateDays = async (data: days): Promise<void> => {
   try {
     await AsyncStorage.setItem(STORAGE_DAYS_KEY, JSON.stringify(data));
@@ -168,7 +171,6 @@ export const getDays = async (): Promise<days> => {
 };
 
 ///// Get and set language
-
 export const updateLang = async (data: boolean): Promise<void> => {
   try {
     await AsyncStorage.setItem(STORAGE_LANG_KEY, JSON.stringify(data));
@@ -193,8 +195,7 @@ export const getLang = async (): Promise<boolean> => {
   }
 };
 
-///// Get and set format for surahs
-
+///// When a user changes the format we need to update it in the async storage
 export const updateFormat = async (data: number): Promise<boolean> => {
   try {
     const oldFormat = await getFormat();
@@ -224,9 +225,8 @@ export const getFormat = async (): Promise<number> => {
   }
 };
 
-///// Update the main dataset
+///// Update the main dataset when the user changes the format
 // 0: surah, 1: juz, 2: custom
-
 export const updateDataset = async (oldFormat: number): Promise<boolean> => {
   try {
     const data = await getData(); // get the current dataset

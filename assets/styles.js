@@ -1,6 +1,7 @@
 // styles.js
 import { StyleSheet } from "react-native";
 
+// COLORS
 export const colors = {
   dark: "#8c7851",
   light: "#f9f4ef",
@@ -15,6 +16,7 @@ export const colors = {
   delete: "#C34A2C",
 };
 
+// ICON SIZES
 export const iconSizes = {
   tabIconSize: 20,
   headerIconSize: 25,
@@ -23,6 +25,7 @@ export const iconSizes = {
   carotSize: 40,
 };
 
+// FONTS
 export const fonts = {
   tabTextSize: 12,
   infoHeadingSize: 16,
@@ -32,6 +35,7 @@ export const fonts = {
   buttonGroupTextSize: 16,
 };
 
+// BORDERS
 export const borders = {
   width: 0.5,
   buttonRadius: 9,

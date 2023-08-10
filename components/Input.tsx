@@ -2,18 +2,21 @@
 import React, { useState, useEffect } from "react";
 import { ListItem, Icon, Button, Dialog, Text, Input } from "@rneui/themed";
 import { View, ScrollView } from "react-native";
+
+// Import components from other files
 import { setCustomData, getCustomData, updateFormat } from "./storageutil";
 import { appStyles, colors, iconSizes } from "../assets/styles";
 
 export interface Item {
-  id: number; // this will be based on the sort order of the user
-  name: string;
+  id: number; // this will be based on the sort order of the user and also the uniqueID
+  name: string; // the name of the chapter, will be copied to transliteration
   enableInput: boolean; // to turn on or off the edit for each field
-  review: boolean;
-  date: Date | string;
+  review: boolean; // whether or not the user has reviewed this entry defaults to false
+  date: Date | string; // the date of last review, defaults to "Not reviewed"
 }
 
 // when we press the done button here we need to close the overlay in edit.tsx
+// this variable gets passed back there
 interface InputComponentProps {
   onDone: () => void;
 }
@@ -22,12 +25,18 @@ const ENTRY_LIMIT = 100; // how many entries can a user add in custom mode
 const MAX_LENGTH = 20; // max length of input string for an entry
 
 const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
+  // dialog box for new or editing an entry, turning it on and off
   const [inputDialogVisible, setInputDialogVisible] = useState<boolean>(false);
+  // show or hide the dialog box for too many entries
   const [limitDialogVisible, setLimitDialogVisible] = useState<boolean>(false);
+  // show or hide the dialog box for deleting an entry
   const [deleteDialogVisible, setDeleteDialogVisible] =
     useState<boolean>(false);
+  // holds the users value that they put in the input dialog
   const [inputDialogValue, setInputDialogValue] = useState<string>("");
+  // holds the index of the item that we are editing
   const [currentKey, setCurrentKey] = useState<number | null>(null);
+  // list of items that the user created, some default values here as well
   const [items, setItems] = useState<Item[]>([
     {
       id: 1,
@@ -38,6 +47,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
     },
   ]);
 
+  // Load once when the component is mounted, get custom data if it exists in async storage
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -151,6 +161,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
     setCurrentKey(id);
   };
 
+  // Show the input dialog
   const showInputDialog = (item: Item) => {
     setCurrentKey(item.id);
     setInputDialogValue(item.name != "New entry" ? item.name : "");
@@ -185,6 +196,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
     setCurrentKey(null);
   };
 
+  // when the user is done editing
   const handleDone = async () => {
     const data = items.map((item) => ({
       id: item.id,
@@ -198,6 +210,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
     setCustomData(data);
   };
 
+  // the input dialog box
   const renderInputDialog = () => {
     return (
       <Dialog
@@ -221,6 +234,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
     );
   };
 
+  // when there are too many entries
   const renderLimitDialog = () => {
     return (
       <Dialog
@@ -279,6 +293,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
     );
   };
 
+  // render the list of custom items
   const renderList = () => {
     return items.map((item, index) => (
       <View key={item.id} style={{ flexDirection: "row" }}>
@@ -328,6 +343,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
     ));
   };
 
+  // button to add a new item
   const renderEntryButton = () => {
     return (
       <Button
@@ -349,6 +365,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
     );
   };
 
+  // done button to close the input component
   const renderDoneButton = () => {
     return (
       <Button
