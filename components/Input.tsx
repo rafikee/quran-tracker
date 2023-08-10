@@ -1,7 +1,9 @@
+// Input.tsx
 import React, { useState, useEffect } from "react";
 import { ListItem, Icon, Button, Dialog, Text, Input } from "@rneui/themed";
 import { View, ScrollView } from "react-native";
 import { setCustomData, getCustomData, updateFormat } from "./storageutil";
+import { appStyles, borders, colors, iconSizes } from "../assets/styles";
 
 export interface Item {
   id: number; // this will be based on the sort order of the user
@@ -112,7 +114,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
 
       const newItem: Item = {
         id: newItemId,
-        name: `New entry`,
+        name: "New entry",
         enableInput: true,
         review: false,
         date: "Not reviewed",
@@ -200,13 +202,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
     return (
       <Dialog
         isVisible={inputDialogVisible}
-        overlayStyle={{
-          borderRadius: 10,
-          backgroundColor: "#f9f4ef",
-          paddingBottom: 0,
-          paddingTop: 10,
-          paddingHorizontal: 5,
-        }}
+        overlayStyle={appStyles.inputDialog}
       >
         <Input
           placeholder="New entry"
@@ -229,7 +225,7 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
     return (
       <Dialog
         isVisible={limitDialogVisible}
-        overlayStyle={{ borderRadius: 10, backgroundColor: "#f9f4ef" }}
+        overlayStyle={appStyles.deleteLimitDialog}
         onBackdropPress={() => setLimitDialogVisible(false)}
       >
         <Dialog.Title title="Too many entries" />
@@ -252,10 +248,10 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
         onBackdropPress={() => {
           setDeleteDialogVisible(false), setCurrentKey(null);
         }}
-        overlayStyle={{ borderRadius: 10, backgroundColor: "#f9f4ef" }}
+        overlayStyle={appStyles.deleteLimitDialog}
       >
         <Dialog.Title title="Please confirm to delete" />
-        <Text style={{ paddingVertical: 10 }}>
+        <Text style={appStyles.spacer}>
           If you have a date associated with this in the tracker it will also be
           deleted.
         </Text>
@@ -263,16 +259,16 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
         <Dialog.Actions>
           <Dialog.Button
             title="Delete"
-            buttonStyle={{ backgroundColor: "#C34A2C" }}
-            titleStyle={{ color: "white", fontWeight: "bold" }}
+            buttonStyle={{ backgroundColor: colors.delete }}
+            titleStyle={{ color: colors.light, fontWeight: "bold" }}
             onPress={deleteItem}
             containerStyle={{ paddingLeft: 10 }}
           />
           <Dialog.Button
             title="Cancel"
             type="outline"
-            buttonStyle={{ borderColor: "#8c7851" }}
-            titleStyle={{ color: "#8c7851" }}
+            buttonStyle={{ borderColor: colors.dark }}
+            titleStyle={{ color: colors.dark }}
             onPress={() => {
               setDeleteDialogVisible(false);
               setCurrentKey(null);
@@ -285,105 +281,79 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
 
   const renderList = () => {
     return items.map((item, index) => (
-      <View
-        key={item.id}
-        style={{
-          flexDirection: "row",
-          marginBottom: 5, // Increase spacing between buttons
-        }}
-      >
+      <View key={item.id} style={{ flexDirection: "row" }}>
         <Icon
           name="delete"
-          size={20}
-          color={"#8c7851"}
+          size={iconSizes.inputListIcons}
+          color={colors.dark}
           onPress={() => {
             handleDeleteIcon(item.id);
           }}
-          style={{ paddingRight: 10, paddingTop: 10 }}
+          style={{ padding: 10 }}
         />
-        <ListItem
-          containerStyle={{
-            padding: 5,
-            width: 200,
-            height: 30,
-            borderRadius: 10,
-            backgroundColor: "white",
-            marginVertical: 5,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.1,
-            shadowRadius: 1,
-            elevation: 1,
-          }}
-        >
+        <ListItem containerStyle={[appStyles.itemConainer, appStyles.shadow]}>
           <ListItem.Title>{item.name}</ListItem.Title>
           <Icon
             name="edit"
-            size={20}
-            color={"#8c7851"}
+            size={iconSizes.inputListIcons}
+            color={colors.dark}
             onPress={() => showInputDialog(item)}
           />
         </ListItem>
         {index > 0 ? (
           <Icon
             name="expand-less"
-            size={40}
-            color={"#8c7851"}
+            size={iconSizes.carotSize}
+            color={colors.dark}
             onPress={() => moveItemUp(index)}
           />
         ) : (
-          <View style={{ width: 40, height: 40 }} /> // Empty place holder because we don't need top arrow
+          <View
+            style={{ width: iconSizes.carotSize, height: iconSizes.carotSize }}
+          /> // Empty place holder because we don't need top arrow
         )}
         {index < items.length - 1 ? (
           <Icon
-            size={40}
-            color={"#8c7851"}
+            size={iconSizes.carotSize}
+            color={colors.dark}
             name="expand-more"
             onPress={() => moveItemDown(index)}
           />
         ) : (
-          <View style={{ width: 40, height: 40 }} /> // Empty place holder because we don't need bottom arrow
+          <View
+            style={{ width: iconSizes.carotSize, height: iconSizes.carotSize }}
+          /> // Empty place holder because we don't need bottom arrow
         )}
       </View>
     ));
   };
 
-  return (
-    <View style={{ alignItems: "center" }}>
-      {renderInputDialog()}
-      {renderLimitDialog()}
-      {renderDeleteDialog()}
-      <ScrollView style={{ maxHeight: 400 }}>
-        {renderList()}
-        <Button
-          title="New entry"
-          onPress={() => {
-            addNewItem();
-          }}
-          radius={15}
-          containerStyle={{
-            width: 120,
-            paddingVertical: 10,
-            alignSelf: "center",
-          }}
-          color={"#8c7851"}
-          type="outline"
-          buttonStyle={{ borderColor: "#8c7851" }}
-          titleStyle={{ fontSize: 16, color: "#8c7851", paddingHorizontal: 5 }}
-          icon={<Icon name="add-circle" size={20} color="#8c7851" />}
-        />
-      </ScrollView>
+  const renderEntryButton = () => {
+    return (
       <Button
-        containerStyle={{
-          paddingVertical: 10,
-          alignSelf: "center",
+        title="New entry"
+        onPress={() => {
+          addNewItem();
         }}
-        buttonStyle={{ width: 75 }}
-        color={"#8c7851"}
+        type="clear"
+        buttonStyle={{ borderColor: colors.dark }}
+        titleStyle={appStyles.newEntryButtonText}
+        icon={
+          <Icon
+            name="add-circle"
+            size={iconSizes.inputListIcons}
+            color={colors.dark}
+          />
+        }
+      />
+    );
+  };
+
+  const renderDoneButton = () => {
+    return (
+      <Button
+        containerStyle={appStyles.doneButtonContainer}
+        color={colors.dark}
         radius={"sm"}
         onPress={() => {
           handleDone();
@@ -392,6 +362,17 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
       >
         Done
       </Button>
+    );
+  };
+
+  return (
+    <View style={{ alignItems: "center" }}>
+      {renderInputDialog()}
+      {renderLimitDialog()}
+      {renderDeleteDialog()}
+      <ScrollView style={{ maxHeight: 400 }}>{renderList()}</ScrollView>
+      {renderEntryButton()}
+      {renderDoneButton()}
     </View>
   );
 };

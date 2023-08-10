@@ -1,10 +1,5 @@
-import {
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  SafeAreaView,
-} from "react-native";
+// Edit.tsx
+import { View, TouchableOpacity, ScrollView } from "react-native";
 import {
   ListItem,
   Text,
@@ -24,6 +19,7 @@ import {
   getFormat,
 } from "./storageutil";
 import InputComponent from "./Input";
+import { appStyles, iconSizes, colors } from "../assets/styles";
 
 interface TrackerProps {
   refreshData: boolean;
@@ -58,8 +54,8 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
   if (isLoading) {
     // Display loading indicator while data is being fetched
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <SocialIcon loading iconSize={100} />
+      <View style={appStyles.container}>
+        <SocialIcon loading iconSize={iconSizes.loadingIconSize} />
       </View>
     );
   }
@@ -96,43 +92,38 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
   const renderChapters = () => {
     if (!chapters) {
       return (
-        <View
-          style={{ alignItems: "center", justifyContent: "center", flex: 1 }}
-        >
-          <Text style={{ fontSize: 16 }}>This should not show up.</Text>
+        <View style={appStyles.container}>
+          <Text style={appStyles.infoText}>This should not show up.</Text>
         </View>
       );
     } else if (chapters.length === 0) {
       return (
-        <Text style={{ alignSelf: "center", padding: 20 }}>
-          Please click{" "}
-          <Text style={{ fontWeight: "bold" }}>Change the format </Text>above
-          and add items to your list.
-        </Text>
+        <View style={appStyles.container}>
+          <Text style={appStyles.infoText}>
+            Please click the
+            <Text style={{ fontWeight: "bold" }}> Settings icon </Text>above and
+            add items to your list.
+          </Text>
+        </View>
       );
     }
     return chapters.map((chapter) => (
       <TouchableOpacity
         onPress={() => handleChapterClick(chapter.id)}
         key={chapter.id}
-        style={styles.button}
-        activeOpacity={0.4}
+        style={appStyles.chapter}
+        activeOpacity={colors.buttonClick}
       >
         <ListItem.Content
-          style={{
-            backgroundColor: chapter.review ? "#c9d5b5" : "#eaddcf",
-            borderRadius: 9,
-            padding: 8,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.2,
-            shadowRadius: 2,
-            elevation: 5,
-          }}
+          style={[
+            appStyles.chapterContainer,
+            appStyles.shadow,
+            { backgroundColor: chapter.review ? colors.good : colors.neutral },
+          ]}
         >
-          <View style={styles.titleContainer}>
+          <View style={appStyles.chapterDate}>
             <Text>{chapter.review ? "In Tracker" : "Not Memorized"}</Text>
-            <ListItem.Title style={styles.title}>
+            <ListItem.Title style={appStyles.chapterTitle}>
               <Text>{arabicTrue ? chapter.name : chapter.transliteration}</Text>
             </ListItem.Title>
           </View>
@@ -143,53 +134,13 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
 
   const renderHeader = () => {
     return (
-      <View
-        style={{
-          overflow: "hidden",
-          paddingBottom: 5,
-        }}
-      >
-        <View
-          style={{
-            flexDirection: "row",
-            borderBottomColor: "black",
-            borderBottomWidth: 0.5,
-            backgroundColor: "#8c7851",
-            maxHeight: 40,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-            elevation: 5,
-          }}
-        >
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {renderSettingsButton()}
+      <View style={appStyles.headerContainer}>
+        <View style={[appStyles.header, appStyles.shadow]}>
+          <View style={appStyles.container}>{renderSettingsButton()}</View>
+          <View style={appStyles.container}>
+            <Text style={appStyles.headerTitle}>Edit</Text>
           </View>
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: "bold",
-                color: "white",
-              }}
-            >
-              Chapters
-            </Text>
-          </View>
-          <View style={{ flex: 1 }}></View>
+          <View style={appStyles.headerEmptySpace}></View>
         </View>
       </View>
     );
@@ -197,61 +148,73 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
 
   const renderSettingsButton = () => {
     return (
-      <Button
-        onPress={handleModify}
-        containerStyle={{
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 2,
-          elevation: 5,
-          minHeight: 50,
-        }}
-        color={"#8c7851"}
-        type="clear"
-      >
-        <Icon name="settings" color="white" size={25} />
+      <Button onPress={handleModify} type="clear">
+        <Icon
+          name="settings"
+          color={colors.light}
+          size={iconSizes.headerIconSize}
+        />
       </Button>
     );
   };
 
-  const renderContent = () => {
+  const renderSettingsMenu = () => {
+    return (
+      <View style={appStyles.spacer}>
+        <Text style={appStyles.headingText}>Select a format for tracking</Text>
+        <ButtonGroup
+          buttons={["Surah", "Juz", "Custom"]}
+          selectedIndex={selectedFormat}
+          textStyle={appStyles.buttonGroupText}
+          onPress={(value) => {
+            buttonChange(value);
+          }}
+          containerStyle={appStyles.buttonSelector}
+          selectedButtonStyle={{ backgroundColor: colors.dark }}
+          selectedTextStyle={{ color: colors.light }}
+        />
+
+        <View style={appStyles.spacer}>{renderSettingsContent()}</View>
+        <View style={{ alignItems: "center" }}>
+          {selectedFormat !== 2 && (
+            // We will show a different done button in Custom formatting
+            <Button
+              containerStyle={appStyles.doneButtonContainer}
+              color={colors.dark}
+              onPress={handleSave}
+              radius="sm"
+            >
+              Done
+            </Button>
+          )}
+          <Text style={{ fontStyle: "italic" }}>
+            *The data is saved independently for each format
+          </Text>
+        </View>
+      </View>
+    );
+  };
+
+  const renderSettingsContent = () => {
     if (selectedFormat === 0) {
       return (
-        <Text
-          style={{
-            alignSelf: "center",
-            fontSize: 16,
-            paddingBottom: 5,
-          }}
-        >
+        <Text style={appStyles.settingsText}>
           Track your review progress by each Surah
         </Text>
       );
     } else if (selectedFormat === 1) {
       return (
-        <Text
-          style={{
-            alignSelf: "center",
-            fontSize: 16,
-            paddingBottom: 5,
-          }}
-        >
+        <Text style={appStyles.settingsText}>
           Track your review progress by each Juz
         </Text>
       );
     } else {
       return (
         <View>
-          <Text
-            style={{
-              alignSelf: "center",
-              paddingBottom: 20,
-              fontSize: 16,
-            }}
-          >
+          <Text style={[appStyles.settingsText, { paddingBottom: 20 }]}>
             Create your own custom list below
           </Text>
+
           <InputComponent onDone={handleSave} />
         </View>
       );
@@ -259,99 +222,16 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
   };
   return (
     <View style={{ flex: 1 }}>
-      <SafeAreaView
-        style={{
-          backgroundColor: "#8c7851",
-        }}
-      ></SafeAreaView>
       {renderHeader()}
-      <ScrollView>{renderChapters()}</ScrollView>
+      <ScrollView style={appStyles.spacer}>{renderChapters()}</ScrollView>
       <Overlay
         isVisible={showModify}
-        overlayStyle={{
-          minHeight: 200,
-          maxHeight: 700,
-          width: 350,
-          borderRadius: 9,
-          backgroundColor: "#f9f4ef",
-        }}
+        overlayStyle={appStyles.settingsContainer}
       >
-        <View>
-          <Text
-            style={{
-              alignSelf: "center",
-              paddingTop: 10,
-              paddingHorizontal: 10,
-              fontWeight: "bold",
-              fontSize: 16,
-            }}
-          >
-            Select a format for tracking
-          </Text>
-          <ButtonGroup
-            buttons={["Surah", "Juz", "Custom"]}
-            selectedIndex={selectedFormat}
-            textStyle={{ fontSize: 16, color: "#8c7851" }}
-            onPress={(value) => {
-              buttonChange(value);
-            }}
-            containerStyle={{
-              marginTop: 10,
-              width: 220,
-              alignSelf: "center",
-              backgroundColor: "#f9f4ef",
-            }}
-            selectedButtonStyle={{ backgroundColor: "#8c7851" }}
-            selectedTextStyle={{ color: "#f9f4ef" }}
-          />
-
-          <View style={{ paddingTop: 10, paddingHorizontal: 10 }}>
-            {renderContent()}
-          </View>
-          {selectedFormat !== 2 && ( // We will show a different done button in Custom formatting
-            <Button
-              containerStyle={{
-                paddingVertical: 10,
-                alignSelf: "center",
-              }}
-              buttonStyle={{ width: 75 }}
-              color={"#8c7851"}
-              radius={"sm"}
-              onPress={handleSave}
-            >
-              Done
-            </Button>
-          )}
-          <Text
-            style={{
-              alignSelf: "center",
-              fontSize: 14,
-              fontStyle: "italic",
-              paddingTop: 5,
-            }}
-          >
-            *The data is saved independently for each format{"\n"}
-          </Text>
-        </View>
+        {renderSettingsMenu()}
       </Overlay>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    paddingVertical: 5,
-    paddingHorizontal: 20,
-    borderRadius: 9,
-  },
-  title: {
-    flex: 1,
-    textAlign: "right",
-  },
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-});
 
 export default Edit;

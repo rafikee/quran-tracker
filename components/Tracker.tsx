@@ -1,20 +1,7 @@
 // Tracker.tsx
 import React, { useEffect, useState } from "react";
-import {
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  View,
-  SafeAreaView,
-} from "react-native";
-import {
-  ListItem,
-  Button,
-  Text,
-  SocialIcon,
-  Icon,
-  Header,
-} from "@rneui/themed";
+import { ScrollView, TouchableOpacity, StyleSheet, View } from "react-native";
+import { ListItem, Button, Text, SocialIcon, Icon } from "@rneui/themed";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import {
   getData,
@@ -24,6 +11,8 @@ import {
   days,
   getLang,
 } from "./storageutil";
+import { appStyles, colors, iconSizes } from "../assets/styles";
+
 interface TrackerProps {
   refreshData: boolean;
 }
@@ -31,7 +20,10 @@ interface TrackerProps {
 const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [previousChapters, setPreviousChapters] = useState<Chapter[][]>([]); // new state variable to keep track of previous states
-  const [colors, setColors] = useState<days>({ orange: 7, red: 14 });
+  const [chapterColors, setChapterColors] = useState<days>({
+    orange: 7,
+    red: 14,
+  });
   const [arabicTrue, setArabicTrue] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -47,9 +39,9 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
         setChapters(result);
         setPreviousChapters([result]);
         const result_days = await getDays();
-        setColors(result_days);
+        setChapterColors(result_days);
         const lang = await getLang();
-        setColors(result_days);
+        setChapterColors(result_days);
         setArabicTrue(lang);
         setIsLoading(false);
       } catch (error) {
@@ -62,8 +54,8 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
   if (isLoading) {
     // Display loading indicator while data is being fetched
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <SocialIcon loading iconSize={100} />
+      <View style={appStyles.container}>
+        <SocialIcon loading iconSize={iconSizes.loadingIconSize} />
       </View>
     );
   }
@@ -111,30 +103,29 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
   const renderChapters = () => {
     if (chapters.filter((chapter) => chapter.review).length === 0) {
       return (
-        <View
-          style={{ alignItems: "center", justifyContent: "center", flex: 1 }}
-        >
-          <Text style={{ fontSize: 16 }}>
-            Start in the Info tab to learn how this works.
+        <View style={appStyles.container}>
+          <Text style={appStyles.infoText}>
+            Start in the <Text style={{ fontWeight: "bold" }}>Info</Text> tab to
+            learn how this works.
           </Text>
         </View>
       );
     }
     const getChapterColor = (date: Date | string): string => {
       if (date === "Not reviewed") {
-        return "#eaddcf";
+        return colors.neutral;
       }
 
       const longTimeAgo = new Date();
       const shortTimeAgo = new Date();
-      longTimeAgo.setDate(longTimeAgo.getDate() - colors.red);
-      shortTimeAgo.setDate(shortTimeAgo.getDate() - colors.orange);
+      longTimeAgo.setDate(longTimeAgo.getDate() - chapterColors.red);
+      shortTimeAgo.setDate(shortTimeAgo.getDate() - chapterColors.orange);
       if (date < longTimeAgo) {
-        return "#ffbaba";
+        return colors.longTimeAgo;
       } else if (date < shortTimeAgo) {
-        return "#FFD3A3";
+        return colors.shortTimeAgo;
       } else {
-        return "#c9d5b5";
+        return colors.good;
       }
     };
 
@@ -142,9 +133,7 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
       if (!date || date === "Not reviewed") {
         return "Not reviewed";
       }
-
       const d = new Date(date);
-
       const options = {
         month: "short",
         day: "2-digit",
@@ -161,22 +150,17 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
         onPress={() => handleChapterClick(chapter.id)}
         onLongPress={() => handleChapterReset(chapter.id)}
         key={chapter.id}
-        style={styles.button}
-        activeOpacity={0.4}
+        style={appStyles.chapter}
+        activeOpacity={colors.buttonClick}
       >
         <ListItem.Content
-          style={{
-            backgroundColor: getChapterColor(chapter.date),
-            borderRadius: 9,
-            padding: 8,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.2,
-            shadowRadius: 2,
-            elevation: 5,
-          }}
+          style={[
+            appStyles.chapterContainer,
+            appStyles.shadow,
+            { backgroundColor: getChapterColor(chapter.date) },
+          ]}
         >
-          <View style={styles.titleContainer}>
+          <View style={appStyles.chapterDate}>
             <Button
               type="clear"
               size="sm"
@@ -184,7 +168,7 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
             >
               {getFormattedDate(chapter.date)}
             </Button>
-            <ListItem.Title style={styles.title}>
+            <ListItem.Title style={appStyles.chapterTitle}>
               <Text>{arabicTrue ? chapter.name : chapter.transliteration}</Text>
             </ListItem.Title>
           </View>
@@ -198,18 +182,15 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
       return (
         <Button
           onPress={handleUndo}
-          containerStyle={{
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.2,
-            shadowRadius: 2,
-            elevation: 5,
-          }}
-          color={"#8c7851"}
           disabled={previousChapters.length < 2}
           type="clear"
         >
-          <Icon name="undo" type="font-awesome" color={"white"} size={25} />
+          <Icon
+            name="undo"
+            type="font-awesome"
+            color={colors.light}
+            size={iconSizes.headerIconSize}
+          />
         </Button>
       );
     }
@@ -217,93 +198,37 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
 
   const renderHeader = () => {
     return (
-      <View
-        style={{
-          overflow: "hidden",
-          paddingBottom: 5,
-        }}
-      >
-        <View
-          style={{
-            flexDirection: "row",
-            borderBottomColor: "black",
-            borderBottomWidth: 0.5,
-            backgroundColor: "#8c7851",
-            maxHeight: 40,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-            elevation: 5,
-          }}
-        >
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-            }}
-          >
-            {renderUndo()}
+      <View style={appStyles.headerContainer}>
+        <View style={[appStyles.header, appStyles.shadow]}>
+          <View style={appStyles.container}>{renderUndo()}</View>
+          <View style={appStyles.container}>
+            <Text style={appStyles.headerTitle}>Tracker</Text>
           </View>
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: "bold",
-                color: "white",
-              }}
-            >
-              Tracker
-            </Text>
-          </View>
-          <View style={{ flex: 1 }}></View>
+          <View style={appStyles.headerEmptySpace}></View>
         </View>
       </View>
     );
   };
 
-  return (
-    <View style={{ flex: 1 }}>
-      <SafeAreaView
-        style={{
-          backgroundColor: "#8c7851",
-        }}
-      ></SafeAreaView>
-      {renderHeader()}
-      <ScrollView>{renderChapters()}</ScrollView>
+  const renderDatePicker = () => {
+    return (
       <DateTimePickerModal
         isVisible={showDatePicker}
         display="inline"
         onConfirm={handleDateSelect}
         onCancel={() => setShowDatePicker(false)}
         maximumDate={new Date()}
-        accentColor="#8c7851"
-        buttonTextColorIOS="#8c7851"
       />
+    );
+  };
+
+  return (
+    <View style={{ flex: 1 }}>
+      {renderHeader()}
+      <ScrollView style={appStyles.spacer}>{renderChapters()}</ScrollView>
+      {renderDatePicker()}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    paddingVertical: 5,
-    paddingHorizontal: 20,
-    borderRadius: 9,
-  },
-  title: {
-    flex: 1,
-    textAlign: "right",
-  },
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-});
 
 export default Tracker;

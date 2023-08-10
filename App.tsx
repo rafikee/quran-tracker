@@ -1,13 +1,12 @@
 // App.tsx
 import React, { useState } from "react";
 import { Tab, TabView } from "@rneui/themed";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import { StatusBar, View, Text } from "react-native";
+import { StatusBar, SafeAreaView, View, Platform } from "react-native";
 
 import About from "./components/About";
 import Edit from "./components/Edit";
 import Tracker from "./components/Tracker";
+import { appStyles, colors, iconSizes } from "./assets/styles";
 
 const App: React.FC = () => {
   const [index, setIndex] = useState(2);
@@ -21,81 +20,71 @@ const App: React.FC = () => {
   };
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle="light-content" />
-      <TabView
-        value={index}
-        onChange={setIndex}
-        disableTransition={true}
-        disableSwipe
-      >
-        <TabView.Item style={{ backgroundColor: "#f9f4ef" }}>
-          <About />
-        </TabView.Item>
-        <TabView.Item style={{ flex: 1, backgroundColor: "#f9f4ef" }}>
-          <Edit refreshData={refreshData} />
-        </TabView.Item>
-        <TabView.Item style={{ flex: 1, backgroundColor: "#f9f4ef" }}>
-          <Tracker refreshData={refreshData} />
-        </TabView.Item>
-      </TabView>
-
+    <View style={{ flex: 1 }}>
+      <SafeAreaView style={appStyles.safeAreaView}>
+        <StatusBar barStyle="light-content" />
+        <TabView
+          value={index}
+          onChange={setIndex}
+          disableTransition={true}
+          disableSwipe
+        >
+          <TabView.Item style={appStyles.tabView}>
+            <About />
+          </TabView.Item>
+          <TabView.Item style={appStyles.tabView}>
+            <Edit refreshData={refreshData} />
+          </TabView.Item>
+          <TabView.Item style={appStyles.tabView}>
+            <Tracker refreshData={refreshData} />
+          </TabView.Item>
+        </TabView>
+      </SafeAreaView>
       <Tab
         value={index}
         onChange={handleTabChange}
         disableIndicator
-        style={{
-          paddingBottom: 20,
-          backgroundColor: "#8c7851",
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.5,
-          shadowRadius: 8,
-          elevation: 5,
-          borderTopWidth: 0.5,
-        }}
+        style={[
+          appStyles.shadow,
+          appStyles.tabArea,
+          { paddingBottom: Platform.OS === "ios" ? 20 : 0 },
+        ]}
       >
         <Tab.Item
           title="Info"
-          titleStyle={{
-            fontSize: 12,
-            color: index === 0 ? "black" : "#f9f4ef",
-            fontWeight: "bold",
-          }}
+          titleStyle={
+            index === 0 ? appStyles.textPressed : appStyles.textNotPressed
+          }
           icon={{
             name: "info",
-            color: index === 0 ? "black" : "#f9f4ef",
-            size: 30,
+            color: index === 0 ? colors.tabPressed : colors.light,
+            size: iconSizes.tabIconSize,
           }}
         />
         <Tab.Item
           title="Chapters"
-          titleStyle={{
-            fontSize: 12,
-            color: index === 1 ? "black" : "#f9f4ef",
-            fontWeight: "bold",
-          }}
+          titleStyle={
+            index === 1 ? appStyles.textPressed : appStyles.textNotPressed
+          }
           icon={{
             name: "list",
-            color: index === 1 ? "black" : "#f9f4ef",
-            size: 30,
+            color: index === 1 ? colors.tabPressed : colors.light,
+            size: iconSizes.tabIconSize,
           }}
         />
         <Tab.Item
           title="Tracker"
-          titleStyle={{
-            fontSize: 12,
-            color: index === 2 ? "black" : "#f9f4ef",
-            fontWeight: "bold",
-          }}
+          titleStyle={
+            index === 2 ? appStyles.textPressed : appStyles.textNotPressed
+          }
           icon={{
             name: "traffic",
-            color: index === 2 ? "black" : "#f9f4ef",
-            size: 30,
+            color: index === 2 ? colors.tabPressed : colors.light,
+            size: iconSizes.tabIconSize,
           }}
         />
       </Tab>
-    </SafeAreaProvider>
+    </View>
   );
 };
 

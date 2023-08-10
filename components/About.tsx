@@ -1,6 +1,6 @@
 // About.tsx
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, ScrollView, SafeAreaView } from "react-native";
+import { View, ScrollView } from "react-native";
 import { Button, Text, ButtonGroup } from "@rneui/themed";
 import {
   updateDays,
@@ -9,6 +9,7 @@ import {
   getLang,
   clearData,
 } from "./storageutil";
+import { appStyles, colors } from "../assets/styles";
 
 const About: React.FC = () => {
   const [orangeValue, setOrangeValue] = useState(7);
@@ -61,17 +62,12 @@ const About: React.FC = () => {
   };
 
   // if we are testing we want the ability to delete all data
+  // Flip the switch at the top
   const renderMasterDelete = () => {
     if (TESTING) {
       return (
         <View>
-          <View
-            style={{
-              height: 3,
-              backgroundColor: "#8c7851",
-              marginVertical: 10,
-            }}
-          />
+          <View style={appStyles.divider} />
           <Button
             color="red"
             style={{ width: 200, alignSelf: "center" }}
@@ -85,275 +81,158 @@ const About: React.FC = () => {
       return "";
     }
   };
+
   const renderHeader = () => {
     return (
-      <View
-        style={{
-          overflow: "hidden",
-          paddingBottom: 5,
-        }}
-      >
-        <View
-          style={{
-            flexDirection: "row",
-            borderBottomColor: "black",
-            borderBottomWidth: 0.5,
-            backgroundColor: "#8c7851",
-            maxHeight: 40,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-            elevation: 5,
-          }}
-        >
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          ></View>
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-              paddingBottom: 10,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: "bold",
-                color: "white",
-              }}
-            >
-              Info
-            </Text>
+      <View style={appStyles.headerContainer}>
+        <View style={[appStyles.header, appStyles.shadow]}>
+          <View style={appStyles.headerEmptySpace}></View>
+          <View style={appStyles.container}>
+            <Text style={appStyles.headerTitle}>Info</Text>
           </View>
-          <View style={{ flex: 1 }}></View>
+          <View style={appStyles.headerEmptySpace}></View>
         </View>
       </View>
     );
   };
 
-  return (
-    <View style={{ flex: 1 }}>
-      <SafeAreaView
-        style={{
-          backgroundColor: "#8c7851",
-        }}
-      ></SafeAreaView>
-      {renderHeader()}
-      <ScrollView>
-        <View style={{ alignItems: "center", flex: 1 }}>
-          <Text
-            style={{ fontSize: 16, paddingHorizontal: 20, fontWeight: "bold" }}
-          >
-            <Text style={{ fontStyle: "italic" }}>Muraja3a</Text> means review
-            {"\n"}
-          </Text>
-          <Text style={{ fontSize: 16, paddingHorizontal: 20 }}>
-            Quran memorization is a rewarding practice, but it’s important to
-            also review what we’ve memorized. This app is a simple way to keep
-            track of your Quran review.{"\n"}
-          </Text>
-          <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-            How do I use it?{"\n"}
-          </Text>
-          <Text style={{ fontSize: 16, paddingHorizontal: 20 }}>
-            In the <Text style={{ fontWeight: "bold" }}>Surahs</Text> tab, tap
-            on each Surah you want to review regularly. This adds it to the
-            Tracker. Tap again if you want to remove it.
-            {"\n"}
-            {"\n"}
-            After you review a Surah, go into the{" "}
-            <Text style={{ fontWeight: "bold" }}>Tracker</Text> tab and tap the
-            Surah. This updates the last review to the current date.{"\n"}
-            {"\n"}Tap the date if you want to correct it to a custom date. Hold
-            down the Surah if you want to clear the date.{"\n"}
-          </Text>
-          <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-            Color Coding{"\n"}
-          </Text>
-          <Text style={{ fontSize: 16, paddingHorizontal: 20 }}>
-            In the <Text style={{ fontWeight: "bold" }}>Tracker</Text>, Surahs
-            will remain{" "}
-            <Text style={{ fontWeight: "bold", color: "green" }}>green</Text> as
-            long as you review them regularly. If you start to slack off, they
-            will turn{" "}
-            <Text style={{ fontWeight: "bold", color: "orange" }}>orange</Text>{" "}
-            and eventually to{" "}
-            <Text style={{ fontWeight: "bold", color: "red" }}>red</Text>.
-          </Text>
-        </View>
-        <View
-          style={{
-            height: 3,
-            backgroundColor: "#8c7851",
-            marginVertical: 20,
-          }}
-        />
-        <Text
-          style={{
-            textAlign: "center",
-            fontWeight: "bold",
-            fontSize: 16,
-            marginHorizontal: 20,
-          }}
-        >
+  const renderAbout = () => {
+    return (
+      <View style={appStyles.textContainer}>
+        <Text style={appStyles.headingText}>
+          <Text style={{ fontStyle: "italic" }}>Muraja3a</Text> means review
+          {"\n"}
+        </Text>
+        <Text style={appStyles.infoText}>
+          Quran memorization is a rewarding practice, but it’s important to also
+          review what we’ve memorized. This app is a simple way to keep track of
+          your Quran review.{"\n"}
+        </Text>
+        <Text style={appStyles.headingText}>How do I use it?{"\n"}</Text>
+        <Text style={appStyles.infoText}>
+          In the <Text style={{ fontWeight: "bold" }}>Surahs</Text> tab, tap on
+          each Surah you want to review regularly. This adds it to the Tracker.
+          Tap again if you want to remove it.
+          {"\n"}
+          {"\n"}
+          After you review a Surah, go into the{" "}
+          <Text style={{ fontWeight: "bold" }}>Tracker</Text> tab and tap the
+          Surah. This updates the last review to the current date.{"\n"}
+          {"\n"}Tap the date if you want to correct it to a custom date. Hold
+          down the Surah if you want to clear the date.{"\n"}
+        </Text>
+        <Text style={appStyles.headingText}>Color Coding{"\n"}</Text>
+        <Text style={appStyles.infoText}>
+          In the <Text style={{ fontWeight: "bold" }}>Tracker</Text>, Surahs
+          will remain{" "}
+          <Text style={{ fontWeight: "bold", color: "green" }}>green</Text> as
+          long as you review them regularly. If you start to slack off, they
+          will turn{" "}
+          <Text style={{ fontWeight: "bold", color: colors.infoOrange }}>
+            orange
+          </Text>{" "}
+          and eventually to{" "}
+          <Text style={{ fontWeight: "bold", color: colors.infoRed }}>red</Text>
+          .
+        </Text>
+      </View>
+    );
+  };
+
+  const renderColorCoding = () => {
+    return (
+      <View style={appStyles.textContainer}>
+        <Text style={appStyles.headingText}>
           Customize the color coding based on your Quran review plan.
           {"\n"}
         </Text>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <View style={appStyles.colorCodeContainer}>
           <Button
             title="-"
-            titleStyle={{ color: "white", fontSize: 20, fontWeight: "bold" }}
+            titleStyle={appStyles.buttonText}
             onPress={handleDecreaseOrange}
-            buttonStyle={{
-              borderRadius: 9,
-              marginLeft: 20,
-              minWidth: 40,
-              maxWidth: 40,
-            }}
-            color={"orange"}
+            buttonStyle={appStyles.button}
+            color={colors.infoOrange}
           />
           <Button
             title="+"
-            titleStyle={{ color: "white", fontSize: 20, fontWeight: "bold" }}
+            titleStyle={appStyles.buttonText}
             onPress={handleIncreaseOrange}
-            color={"orange"}
-            buttonStyle={{
-              borderRadius: 9,
-              marginLeft: 5,
-              minWidth: 40,
-              maxWidth: 40,
-            }}
+            color={colors.infoOrange}
+            buttonStyle={appStyles.button}
           />
-          <Text style={{ marginHorizontal: 10, fontSize: 16 }}>
+          <Text style={appStyles.infoText}>
             Surah turns <Text style={{ fontWeight: "bold" }}>orange</Text> after{" "}
             <Text style={{ fontWeight: "bold" }}>
               {orangeValue} {orangeValue > 1 ? "days" : "day"}
             </Text>
           </Text>
         </View>
-        <View
-          style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}
-        >
+        <View style={appStyles.colorCodeContainer}>
           <Button
             title="-"
-            titleStyle={{ color: "white", fontSize: 20, fontWeight: "bold" }}
+            titleStyle={appStyles.buttonText}
             onPress={handleDecreaseRed}
-            buttonStyle={{
-              borderRadius: 9,
-              marginLeft: 20,
-              minWidth: 40,
-              maxWidth: 40,
-            }}
-            color={"red"}
+            buttonStyle={appStyles.button}
+            color={colors.infoRed}
           />
           <Button
             title="+"
-            titleStyle={{ color: "white", fontSize: 20, fontWeight: "bold" }}
+            titleStyle={appStyles.buttonText}
             onPress={handleIncreaseRed}
-            color={"red"}
-            buttonStyle={{
-              borderRadius: 9,
-              marginLeft: 5,
-              minWidth: 40,
-              maxWidth: 40,
-            }}
+            color={colors.infoRed}
+            buttonStyle={appStyles.button}
           />
-          <Text style={{ marginHorizontal: 10, fontSize: 16 }}>
+          <Text style={appStyles.infoText}>
             Surah turns <Text style={{ fontWeight: "bold" }}>red</Text> after{" "}
             <Text style={{ fontWeight: "bold" }}>
               {redValue} {redValue > 1 ? "days" : "day"}
             </Text>
           </Text>
         </View>
-        <View style={{ margin: 15 }}>
-          <Text style={{ fontStyle: "italic" }}>
-            *Note that you cannot set the orange value greater than the red
-            value.
-          </Text>
-        </View>
-        <View
-          style={{
-            height: 3,
-            backgroundColor: "#8c7851",
-            marginVertical: 10,
+        <Text style={{ fontStyle: "italic" }}>
+          *Note that you cannot set the orange value greater than the red value.
+        </Text>
+      </View>
+    );
+  };
+
+  const renderLanguageSelector = () => {
+    return (
+      <View style={appStyles.textContainer}>
+        <Text style={appStyles.headingText}>
+          Display langauge for chapter names
+        </Text>
+        <ButtonGroup
+          buttons={["Arabic", "English"]}
+          selectedIndex={selectedLanguage}
+          textStyle={appStyles.buttonGroupText}
+          onPress={(value) => {
+            setSelectedLanguage(value);
+            updateLang(value === 0 ? true : false);
           }}
+          containerStyle={appStyles.buttonSelector}
+          selectedButtonStyle={{ backgroundColor: colors.dark }}
+          selectedTextStyle={{ color: colors.light }}
         />
-        <View>
-          <Text
-            style={{
-              textAlign: "center",
-              fontWeight: "bold",
-              fontSize: 16,
-              marginHorizontal: 20,
-            }}
-          >
-            Display langauge for Surah names
-          </Text>
-          <ButtonGroup
-            buttons={["Arabic", "English"]}
-            selectedIndex={selectedLanguage}
-            textStyle={{ fontSize: 16, color: "#8c7851" }}
-            onPress={(value) => {
-              setSelectedLanguage(value);
-              updateLang(value === 0 ? true : false);
-            }}
-            containerStyle={{
-              marginTop: 20,
-              maxWidth: 200,
-              alignSelf: "center",
-              backgroundColor: "#f9f4ef",
-            }}
-            selectedButtonStyle={{ backgroundColor: "#8c7851" }}
-            selectedTextStyle={{ color: "#f9f4ef" }}
-          />
-        </View>
+      </View>
+    );
+  };
+
+  return (
+    <View style={{ flex: 1 }}>
+      {renderHeader()}
+      <ScrollView style={appStyles.spacer}>
+        {renderAbout()}
+        <View style={appStyles.divider} />
+        {renderColorCoding()}
+        <View style={appStyles.divider} />
+        {renderLanguageSelector()}
         {renderMasterDelete()}
+        <View style={appStyles.spacer} />
       </ScrollView>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  contentView: {
-    padding: 20,
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "stretch",
-  },
-});
-
-// Commented out reset button for now
-/*
-<View
-        style={{
-          height: 5,
-          backgroundColor: "#8c7851",
-          marginVertical: 10,
-        }}
-      />
-      <Text style={{ fontSize: 16, textAlign: "center" }}>
-        {"\n"}If you want to start all over click the{" "}
-        <Text style={{ fontWeight: "bold" }}>red</Text> button
-      </Text>
-      <Button
-        color={"#ffbaba"}
-        onPress={resetData}
-        buttonStyle={{
-          borderRadius: 9,
-          marginTop: 8,
-          marginBottom: 8,
-          marginHorizontal: 80,
-        }}
-      >
-        <Text style={{ fontSize: 20 }}>Reset all Surahs</Text>
-      </Button>
-      */
 
 export default About;
