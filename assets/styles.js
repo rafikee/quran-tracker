@@ -48,6 +48,12 @@ export const appStyles = StyleSheet.create({
     backgroundColor: colors.dark,
     flex: 1,
   },
+  safeAreaViewLoading: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: borders.paddingSize,
+  },
   headerContainer: {
     overflow: "hidden",
   },

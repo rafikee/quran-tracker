@@ -1,7 +1,7 @@
 // Tracker.tsx
 import React, { useEffect, useState } from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
-import { ListItem, Button, Text, SocialIcon, Icon } from "@rneui/themed";
+import { ListItem, Button, Text, Icon, SocialIcon } from "@rneui/themed";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 // Import components from other files
@@ -64,7 +64,13 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
   if (isLoading) {
     // Display loading indicator while data is being fetched
     return (
-      <View style={appStyles.container}>
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <SocialIcon loading iconSize={iconSizes.loadingIconSize} />
       </View>
     );
