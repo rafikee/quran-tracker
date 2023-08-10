@@ -312,6 +312,12 @@ const InputComponent: React.FC<InputComponentProps> = ({ onDone }) => {
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",
+
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.1,
+            shadowRadius: 1,
+            elevation: 1,
           }}
         >
           <ListItem.Title>{item.name}</ListItem.Title>

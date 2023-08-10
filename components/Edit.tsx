@@ -1,4 +1,10 @@
-import { View, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  SafeAreaView,
+} from "react-native";
 import {
   ListItem,
   Text,
@@ -117,6 +123,11 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
             backgroundColor: chapter.review ? "#c9d5b5" : "#eaddcf",
             borderRadius: 9,
             padding: 8,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.2,
+            shadowRadius: 2,
+            elevation: 5,
           }}
         >
           <View style={styles.titleContainer}>
@@ -128,6 +139,80 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
         </ListItem.Content>
       </TouchableOpacity>
     ));
+  };
+
+  const renderHeader = () => {
+    return (
+      <View
+        style={{
+          overflow: "hidden",
+          paddingBottom: 5,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            borderBottomColor: "black",
+            borderBottomWidth: 0.5,
+            backgroundColor: "#8c7851",
+            maxHeight: 40,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            elevation: 5,
+          }}
+        >
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {renderSettingsButton()}
+          </View>
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "bold",
+                color: "white",
+              }}
+            >
+              Chapters
+            </Text>
+          </View>
+          <View style={{ flex: 1 }}></View>
+        </View>
+      </View>
+    );
+  };
+
+  const renderSettingsButton = () => {
+    return (
+      <Button
+        onPress={handleModify}
+        containerStyle={{
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 2,
+          elevation: 5,
+          minHeight: 50,
+        }}
+        color={"#8c7851"}
+        type="clear"
+      >
+        <Icon name="settings" color="white" size={25} />
+      </Button>
+    );
   };
 
   const renderContent = () => {
@@ -174,25 +259,13 @@ const Edit: React.FC<TrackerProps> = ({ refreshData }) => {
   };
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView style={{ paddingVertical: 8 }}>
-        <Button
-          onPress={handleModify}
-          radius={"sm"}
-          containerStyle={{
-            marginHorizontal: 40,
-            maxWidth: 200,
-            paddingBottom: 5,
-            alignSelf: "center",
-          }}
-          color={"#f9f4ef"}
-          type="outline"
-          buttonStyle={{ borderColor: "#8c7851" }}
-        >
-          <Text style={{ color: "#8c7851" }}>Change the format </Text>
-          <Icon name="settings" color={"#8c7851"} size={20} />
-        </Button>
-        {renderChapters()}
-      </ScrollView>
+      <SafeAreaView
+        style={{
+          backgroundColor: "#8c7851",
+        }}
+      ></SafeAreaView>
+      {renderHeader()}
+      <ScrollView>{renderChapters()}</ScrollView>
       <Overlay
         isVisible={showModify}
         overlayStyle={{
@@ -277,9 +350,7 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     flexDirection: "row",
-    justifyContent: "flex-end",
     alignItems: "center",
-    height: "100%",
   },
 });
 

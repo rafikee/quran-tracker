@@ -1,7 +1,20 @@
 // Tracker.tsx
 import React, { useEffect, useState } from "react";
-import { ScrollView, TouchableOpacity, StyleSheet, View } from "react-native";
-import { ListItem, Button, Text, SocialIcon, Icon } from "@rneui/themed";
+import {
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  View,
+  SafeAreaView,
+} from "react-native";
+import {
+  ListItem,
+  Button,
+  Text,
+  SocialIcon,
+  Icon,
+  Header,
+} from "@rneui/themed";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import {
   getData,
@@ -156,6 +169,11 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
             backgroundColor: getChapterColor(chapter.date),
             borderRadius: 9,
             padding: 8,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.2,
+            shadowRadius: 2,
+            elevation: 5,
           }}
         >
           <View style={styles.titleContainer}>
@@ -180,25 +198,85 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
       return (
         <Button
           onPress={handleUndo}
-          radius={"sm"}
           containerStyle={{
-            marginHorizontal: 40,
-            marginVertical: 5,
-            maxWidth: 50,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.2,
+            shadowRadius: 2,
+            elevation: 5,
           }}
           color={"#8c7851"}
           disabled={previousChapters.length < 2}
+          type="clear"
         >
-          <Icon name="undo" color={"white"} />
+          <Icon name="undo" type="font-awesome" color={"white"} size={25} />
         </Button>
       );
     }
   };
 
+  const renderHeader = () => {
+    return (
+      <View
+        style={{
+          overflow: "hidden",
+          paddingBottom: 5,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            borderBottomColor: "black",
+            borderBottomWidth: 0.5,
+            backgroundColor: "#8c7851",
+            maxHeight: 40,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            elevation: 5,
+          }}
+        >
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+            }}
+          >
+            {renderUndo()}
+          </View>
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "bold",
+                color: "white",
+              }}
+            >
+              Tracker
+            </Text>
+          </View>
+          <View style={{ flex: 1 }}></View>
+        </View>
+      </View>
+    );
+  };
+
   return (
-    <View>
-      <ScrollView style={{ paddingTop: 8 }}>{renderChapters()}</ScrollView>
-      {renderUndo()}
+    <View style={{ flex: 1 }}>
+      <SafeAreaView
+        style={{
+          backgroundColor: "#8c7851",
+        }}
+      ></SafeAreaView>
+      {renderHeader()}
+      <ScrollView>{renderChapters()}</ScrollView>
       <DateTimePickerModal
         isVisible={showDatePicker}
         display="inline"
@@ -224,9 +302,7 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     flexDirection: "row",
-    justifyContent: "flex-end",
     alignItems: "center",
-    height: "100%",
   },
 });
 
