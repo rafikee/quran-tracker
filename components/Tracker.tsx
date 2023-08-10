@@ -184,6 +184,7 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
           onPress={handleUndo}
           disabled={previousChapters.length < 2}
           type="clear"
+          disabledStyle={{ opacity: 0.5 }}
         >
           <Icon
             name="undo"
