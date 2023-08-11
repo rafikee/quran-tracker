@@ -251,7 +251,10 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
   return (
     <View style={{ flex: 1 }}>
       {renderHeader()}
-      <ScrollView style={appStyles.spacer}>{renderChapters()}</ScrollView>
+      <ScrollView style={appStyles.spacer}>
+        {renderChapters()}
+        <View style={appStyles.spacer}></View>
+      </ScrollView>
       {renderDatePicker()}
     </View>
   );
