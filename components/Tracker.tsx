@@ -20,7 +20,6 @@ import {
   getLang,
 } from "./storageutil";
 import { appStyles, colors, iconSizes } from "../assets/styles";
-import { BottomSheet } from "@rneui/base";
 
 // this variable is passed from App.tsx to force a refresh of the data when it changes
 interface TrackerProps {
