@@ -1,9 +1,15 @@
 // Tracker.tsx
 import React, { useEffect, useState } from "react";
-import { ScrollView, TouchableOpacity, View } from "react-native";
-import { ListItem, Button, Text, Icon, SocialIcon } from "@rneui/themed";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
-
+import { ScrollView, TouchableOpacity, View, Platform } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import {
+  ListItem,
+  Button,
+  Text,
+  Icon,
+  SocialIcon,
+  Overlay,
+} from "@rneui/themed";
 // Import components from other files
 import {
   getData,
@@ -238,13 +244,23 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
   // render the calendar modal
   const renderDatePicker = () => {
     return (
-      <DateTimePickerModal
+      <Overlay
         isVisible={showDatePicker}
-        display="inline"
-        onConfirm={handleDateSelect}
-        onCancel={() => setShowDatePicker(false)}
-        maximumDate={new Date()}
-      />
+        onBackdropPress={() => setShowDatePicker(false)}
+        style={{ borderRadius: 10 }}
+      >
+        <DateTimePicker
+          value={new Date()}
+          maximumDate={new Date()}
+          mode="date"
+          display={Platform.OS === "ios" ? "inline" : "calendar"}
+          onChange={(event, selectedDate) => {
+            if (selectedDate) {
+              handleDateSelect(selectedDate); // Call the handleDateSelect function with the selected date
+            }
+          }}
+        />
+      </Overlay>
     );
   };
 
