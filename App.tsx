@@ -1,5 +1,5 @@
 // App.tsx
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Tab, TabView } from "@rneui/themed";
 import { StatusBar, SafeAreaView, View, Platform } from "react-native";
 
@@ -15,7 +15,6 @@ const App: React.FC = () => {
   // when this changes, we will refresh the data in the Tracker/Edit components
   // it gets passed to those componenets as a prop
   const [refreshData, setRefreshData] = useState(false);
-  const [wait, setWait] = useState(true);
 
   // Toggle the refreshData to force a refresh
   // And update the selected tab index
@@ -25,17 +24,6 @@ const App: React.FC = () => {
     }
     setIndex(newIndex); // Update the selected tab index
   };
-
-  // When the app first loads wait 500 ms before showing the content
-  useEffect(() => {
-    setTimeout(() => {
-      setWait(false);
-    }, 500);
-  }, []);
-
-  while (wait) {
-    return <View style={{ backgroundColor: colors.light }}></View>;
-  }
 
   return (
     <View style={{ flex: 1 }}>

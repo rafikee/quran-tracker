@@ -64,13 +64,7 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
   if (isLoading) {
     // Display loading indicator while data is being fetched
     return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
+      <View style={appStyles.container}>
         <SocialIcon loading iconSize={iconSizes.loadingIconSize} />
       </View>
     );
