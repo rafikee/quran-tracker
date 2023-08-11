@@ -9,6 +9,13 @@ import Edit from "./components/Edit";
 import Tracker from "./components/Tracker";
 import { appStyles, colors, iconSizes } from "./assets/styles";
 
+import * as Sentry from "@sentry/react-native";
+
+Sentry.init({
+  dsn: "https://f013868409175e26e52df82b1a501031@o4505684250853376.ingest.sentry.io/4505684254130176",
+  debug: true, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
+});
+
 const App: React.FC = () => {
   // the index determines which tab we are showing
   const [index, setIndex] = useState(2);
@@ -102,4 +109,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export default Sentry.wrap(App);

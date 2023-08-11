@@ -2,7 +2,7 @@
   "expo": {
     "name": "Muraja3a",
     "slug": "quran-tracker",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -43,6 +43,18 @@
     },
     "updates": {
       "url": "https://u.expo.dev/85c4e158-b73a-47ea-9b06-c77d2f907641"
+    },
+    "plugins": ["sentry-expo"],
+    "hooks": {
+      "postPublish": [
+        {
+          "file": "sentry-expo/upload-sourcemaps",
+          "config": {
+            "organization": "sentry org slug, or use the `SENTRY_ORG` environment variable",
+            "project": "sentry project name, or use the `SENTRY_PROJECT` environment variable"
+          }
+        }
+      ]
     }
   }
 }

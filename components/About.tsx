@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { View, ScrollView } from "react-native";
 import { Button, Text, ButtonGroup } from "@rneui/themed";
+import * as Sentry from "@sentry/react-native";
 
 // Import components from other files
 import {
@@ -21,7 +22,7 @@ const About: React.FC = () => {
   const [selectedLanguage, setSelectedLanguage] = useState(0);
 
   // Flip and off for testing
-  const TESTING = false;
+  const TESTING = true;
 
   // Load the data when the page loads
   useEffect(() => {
@@ -82,6 +83,13 @@ const About: React.FC = () => {
           >
             Delete all data
           </Button>
+          <View style={appStyles.divider} />
+          <Button
+            title="Try!"
+            onPress={() => {
+              Sentry.captureException(new Error("First error"));
+            }}
+          />
         </View>
       );
     } else {
