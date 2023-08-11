@@ -22,7 +22,7 @@ const About: React.FC = () => {
   const [selectedLanguage, setSelectedLanguage] = useState(0);
 
   // Flip and off for testing
-  const TESTING = true;
+  const TESTING = false;
 
   // Load the data when the page loads
   useEffect(() => {
