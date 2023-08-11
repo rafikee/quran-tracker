@@ -41,7 +41,7 @@ const About: React.FC = () => {
 
   // Increase/Decrease the number of days for each color
   const handleIncreaseOrange = () => {
-    if (orangeValue < redValue) {
+    if (orangeValue < redValue - 1) {
       setOrangeValue(orangeValue + 1);
       updateDays({ orange: orangeValue, red: redValue });
     }
@@ -62,7 +62,7 @@ const About: React.FC = () => {
   };
 
   const handleDecreaseRed = () => {
-    if (redValue > orangeValue) {
+    if (redValue > orangeValue + 1) {
       setRedValue(redValue - 1);
       updateDays({ orange: orangeValue, red: redValue });
     }
