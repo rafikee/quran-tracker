@@ -30,7 +30,7 @@ const App: React.FC = () => {
       {/* Put the main content in the SafeAreaView */}
       <SafeAreaView style={appStyles.safeAreaView}>
         {/* Since the background is dark we want the bar to be light */}
-        <StatusBar barStyle="light-content" />
+        <StatusBar barStyle="light-content" backgroundColor={colors.dark} />
         {/* Here is the main content */}
         <TabView
           value={index}

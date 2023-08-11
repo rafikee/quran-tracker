@@ -20,6 +20,7 @@ import {
   getLang,
 } from "./storageutil";
 import { appStyles, colors, iconSizes } from "../assets/styles";
+import { BottomSheet } from "@rneui/base";
 
 // this variable is passed from App.tsx to force a refresh of the data when it changes
 interface TrackerProps {
@@ -242,30 +243,53 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
   };
 
   // render the calendar modal
+  // we have one for ios and one for android
   const renderDatePicker = () => {
-    return (
-      <Overlay
-        isVisible={showDatePicker}
-        onBackdropPress={() => setShowDatePicker(false)}
-        style={{ borderRadius: 10 }}
-      >
-        <DateTimePicker
-          value={new Date()}
-          themeVariant="light"
-          maximumDate={new Date()}
-          mode="date"
-          display={Platform.OS === "ios" ? "inline" : "calendar"}
-          onChange={(event, selectedDate) => {
-            if (selectedDate && event.type != "dismissed") {
-              // if a user clicks cancel on android we don't do this
-              handleDateSelect(selectedDate); // Call the handleDateSelect function with the selected date
-            } else {
-              setShowDatePicker(false);
-            }
-          }}
-        />
-      </Overlay>
-    );
+    if (Platform.OS !== "ios") {
+      return (
+        <View>
+          {showDatePicker && (
+            <DateTimePicker
+              value={new Date()}
+              maximumDate={new Date()}
+              mode="date"
+              display="calendar"
+              onChange={(event, selectedDate) => {
+                if (selectedDate && event.type != "dismissed") {
+                  // if a user clicks cancel on android we don't do this
+                  handleDateSelect(selectedDate); // Call the handleDateSelect function with the selected date
+                } else {
+                  setShowDatePicker(false);
+                }
+              }}
+            />
+          )}
+        </View>
+      );
+    } else {
+      return (
+        <Overlay
+          isVisible={showDatePicker}
+          onBackdropPress={() => setShowDatePicker(false)}
+        >
+          <DateTimePicker
+            value={new Date()}
+            themeVariant="light"
+            maximumDate={new Date()}
+            mode="date"
+            display="inline"
+            onChange={(event, selectedDate) => {
+              if (selectedDate) {
+                // if a user clicks cancel on android we don't do this
+                handleDateSelect(selectedDate); // Call the handleDateSelect function with the selected date
+              } else {
+                setShowDatePicker(false);
+              }
+            }}
+          />
+        </Overlay>
+      );
+    }
   };
 
   return (

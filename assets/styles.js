@@ -69,7 +69,6 @@ export const appStyles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: borders.paddingSize,
   },
   spacer: {
     paddingVertical: 10,
