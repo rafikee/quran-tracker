@@ -28,7 +28,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.rafikee.qurantracker",
-      "versionCode": 5
+      "versionCode": 6
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -43,7 +43,6 @@
     },
     "updates": {
       "url": "https://u.expo.dev/85c4e158-b73a-47ea-9b06-c77d2f907641"
-    },
-    "plugins": ["sentry-expo"]
+    }
   }
 }
