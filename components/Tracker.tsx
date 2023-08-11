@@ -251,12 +251,16 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
       >
         <DateTimePicker
           value={new Date()}
+          themeVariant="light"
           maximumDate={new Date()}
           mode="date"
           display={Platform.OS === "ios" ? "inline" : "calendar"}
           onChange={(event, selectedDate) => {
-            if (selectedDate) {
+            if (selectedDate && event.type != "dismissed") {
+              // if a user clicks cancel on android we don't do this
               handleDateSelect(selectedDate); // Call the handleDateSelect function with the selected date
+            } else {
+              setShowDatePicker(false);
             }
           }}
         />
