@@ -139,14 +139,15 @@ const Tracker: React.FC<TrackerProps> = ({ refreshData }) => {
       if (date === "Not reviewed") {
         return colors.neutral;
       }
+      const d = new Date(date);
 
       const longTimeAgo = new Date();
       const shortTimeAgo = new Date();
       longTimeAgo.setDate(longTimeAgo.getDate() - chapterColors.red);
       shortTimeAgo.setDate(shortTimeAgo.getDate() - chapterColors.orange);
-      if (date < longTimeAgo) {
+      if (d < longTimeAgo) {
         return colors.longTimeAgo;
-      } else if (date < shortTimeAgo) {
+      } else if (d < shortTimeAgo) {
         return colors.shortTimeAgo;
       } else {
         return colors.good;
